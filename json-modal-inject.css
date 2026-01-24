@@ -1,0 +1,282 @@
+/* JSON 大窗口 - 注入到页面的样式 */
+/* 覆盖整个浏览器视口的 90% */
+
+.json-modal-overlay-inject {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2147483647 !important;
+  animation: json-modal-fadeIn 0.2s ease !important;
+  padding: 20px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+@keyframes json-modal-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 弹窗容器 - 毛玻璃效果 - 90% 视口 */
+.json-modal-container-inject {
+  width: 90vw !important;
+  height: 90vh !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  animation: json-modal-slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes json-modal-slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 弹窗头部 */
+.json-modal-header-inject {
+  padding: 20px 24px !important;
+  background: rgba(139, 92, 246, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.json-modal-title-inject {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.json-modal-icon-inject {
+  font-size: 24px !important;
+}
+
+.json-modal-title-inject h2 {
+  margin: 0 !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+}
+
+.json-modal-subtitle-inject {
+  font-size: 12px !important;
+  color: #64748b !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+}
+
+.json-modal-actions-inject {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+/* 弹窗按钮 */
+.json-modal-btn-inject {
+  padding: 8px 14px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  color: #1e293b !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  font-family: inherit !important;
+}
+
+.json-modal-btn-inject:hover {
+  background: rgba(139, 92, 246, 0.1) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2) !important;
+}
+
+.json-modal-btn-inject.primary {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.9)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.json-modal-btn-inject.primary:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 1), rgba(109, 40, 217, 1)) !important;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+}
+
+.json-modal-btn-inject.close {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+}
+
+.json-modal-btn-inject.close:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+.json-modal-btn-inject svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* 弹窗内容区 */
+.json-modal-content-inject {
+  flex: 1 !important;
+  display: flex !important;
+  gap: 16px !important;
+  padding: 20px 24px !important;
+  overflow: hidden !important;
+}
+
+.json-modal-panel-inject {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.json-modal-panel-header-inject {
+  padding: 12px 16px !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+.json-modal-textarea-inject {
+  flex: 1 !important;
+  padding: 16px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #1e293b !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  resize: none !important;
+  outline: none !important;
+}
+
+.json-modal-textarea-inject::placeholder {
+  color: #94a3b8 !important;
+}
+
+.json-modal-output-inject {
+  flex: 1 !important;
+  padding: 16px !important;
+  overflow: auto !important;
+  background: transparent !important;
+  color: #1e293b !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  cursor: pointer !important;
+}
+
+.json-modal-output-inject:hover {
+  background: rgba(139, 92, 246, 0.02) !important;
+}
+
+/* 错误提示 */
+.json-modal-error-inject {
+  padding: 12px 24px !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-top: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+  font-size: 13px !important;
+  display: none !important;
+}
+
+.json-modal-error-inject.show {
+  display: block !important;
+}
+
+/* JSON 语法高亮 */
+.json-modal-output-inject .json-key {
+  color: #8b5cf6 !important;
+  font-weight: 600 !important;
+}
+
+.json-modal-output-inject .json-string {
+  color: #10b981 !important;
+}
+
+.json-modal-output-inject .json-number {
+  color: #f59e0b !important;
+}
+
+.json-modal-output-inject .json-boolean {
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+.json-modal-output-inject .json-null {
+  color: #6b7280 !important;
+  font-style: italic !important;
+}
+
+/* 滚动条样式 */
+.json-modal-textarea-inject::-webkit-scrollbar,
+.json-modal-output-inject::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.json-modal-textarea-inject::-webkit-scrollbar-track,
+.json-modal-output-inject::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05) !important;
+  border-radius: 4px !important;
+}
+
+.json-modal-textarea-inject::-webkit-scrollbar-thumb,
+.json-modal-output-inject::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.json-modal-textarea-inject::-webkit-scrollbar-thumb:hover,
+.json-modal-output-inject::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5) !important;
+}
