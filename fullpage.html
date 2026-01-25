@@ -154,29 +154,36 @@
         <!-- 颜色工具页面 -->
         <div class="page tool-page" id="color-page">
           <div class="tool-content">
-            <div class="color-picker-container">
-              <div class="color-preview-wrapper">
-                <label>选择颜色</label>
-                <div class="color-preview" id="color-preview"></div>
-                <input type="color" id="color-input" value="#000000">
+            <div class="color-tool-layout">
+              <!-- 左侧：拾色器 -->
+              <div class="color-picker-section">
+                <div class="color-preview-wrapper">
+                  <label>选择颜色</label>
+                  <div class="color-preview" id="color-preview"></div>
+                  <input type="color" id="color-input" value="#000000">
+                </div>
+                <div class="input-group">
+                  <label>HEX 值</label>
+                  <input type="text" id="hex-input" value="#000000">
+                </div>
               </div>
-              <div class="input-group">
-                <label>HEX 值</label>
-                <input type="text" id="hex-input" value="#000000">
-              </div>
-            </div>
-            <div class="color-formats">
-              <div class="format-item" data-copy="hex">
-                <span class="format-label">HEX:</span>
-                <span id="hex-value" class="format-value">#000000</span>
-              </div>
-              <div class="format-item" data-copy="rgb">
-                <span class="format-label">RGB:</span>
-                <span id="rgb-value" class="format-value">rgb(0, 0, 0)</span>
-              </div>
-              <div class="format-item" data-copy="hsl">
-                <span class="format-label">HSL:</span>
-                <span id="hsl-value" class="format-value">hsl(0, 0%, 0%)</span>
+
+              <!-- 右侧：结果和复制功能 -->
+              <div class="color-results-section">
+                <div class="color-formats">
+                  <div class="format-item" data-copy="hex">
+                    <span class="format-label">HEX:</span>
+                    <span id="hex-value" class="format-value">#000000</span>
+                  </div>
+                  <div class="format-item" data-copy="rgb">
+                    <span class="format-label">RGB:</span>
+                    <span id="rgb-value" class="format-value">rgb(0, 0, 0)</span>
+                  </div>
+                  <div class="format-item" data-copy="hsl">
+                    <span class="format-label">HSL:</span>
+                    <span id="hsl-value" class="format-value">hsl(0, 0%, 0%)</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
