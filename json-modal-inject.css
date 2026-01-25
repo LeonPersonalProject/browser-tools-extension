@@ -280,3 +280,71 @@
 .json-modal-output-inject::-webkit-scrollbar-thumb:hover {
   background: rgba(139, 92, 246, 0.5) !important;
 }
+
+/* JSON 可折叠样式 */
+.json-modal-output-inject .json-collapsible {
+  display: inline-block !important;
+}
+
+.json-modal-output-inject .json-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  margin-right: 4px !important;
+  transition: all 0.2s ease !important;
+  width: 16px !important;
+  height: 16px !important;
+  text-align: center !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+.json-modal-output-inject .json-toggle:hover {
+  color: #8b5cf6 !important;
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: #8b5cf6 !important;
+  transform: scale(1.1) !important;
+}
+
+.json-modal-output-inject .json-bracket {
+  color: #64748b !important;
+  font-weight: bold !important;
+}
+
+.json-modal-output-inject .json-count {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  margin-left: 6px !important;
+  font-style: italic !important;
+}
+
+.json-modal-output-inject .json-content {
+  display: block !important;
+  margin-left: 0 !important;
+}
+
+.json-modal-output-inject .json-line {
+  display: block !important;
+  line-height: 1.6 !important;
+}
+
+.json-modal-output-inject .json-indent {
+  white-space: pre !important;
+}
+
+.json-modal-output-inject .json-colon {
+  color: #64748b !important;
+}
+
+.json-modal-output-inject .json-comma {
+  color: #64748b !important;
+}

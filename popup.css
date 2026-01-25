@@ -6,8 +6,8 @@
 }
 
 html {
-  border-radius: 16px;
   overflow: hidden;
+  height: 100%;
 }
 
 /* CSS 变量 - 浅色主题（清新淡雅） */
@@ -78,9 +78,10 @@ html {
 }
 
 body {
-  width: 550px;
-  min-height: 650px;
-  max-height: 750px;
+  width: 800px;
+  height: 600px;
+  min-height: 600px;
+  max-height: 600px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -88,15 +89,18 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .container {
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
-  border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  position: relative;
 }
 
 /* 头部样式 - 毛玻璃效果 */
@@ -104,48 +108,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 20px;
   background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
-  border-radius: 16px 16px 0 0;
   gap: 12px;
-}
-
-/* 返回按钮 */
-.back-btn {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  transform: translateX(-2px);
-}
-
-.theme-dark .back-btn:hover {
-  background: rgba(19, 47, 76, 0.8);
-}
-
-.back-btn::before {
-  display: none;
+  flex-shrink: 0;
 }
 
 .logo-section {
@@ -196,108 +166,165 @@ body {
   transform: rotate(90deg);
 }
 
-/* 工具网格 */
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 24px 20px;
-  background: var(--bg-primary);
-}
-
-.tool-card {
+.fullscreen-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 32px 20px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: var(--glass-shadow);
-  position: relative;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.fullscreen-btn::before {
+  display: none;
+}
+
+.fullscreen-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+/* 主内容区域 - 左右布局 */
+.main-content {
+  display: flex;
+  flex: 1;
   overflow: hidden;
+  background: var(--bg-primary);
+  min-height: 0;
+  height: 100%;
 }
 
-.tool-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-    rgba(66, 153, 225, 0.05),
-    transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+/* 左侧工具导航 */
+.tools-nav {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.tool-card:hover {
-  background: rgba(255, 255, 255, 0.9);
+.tool-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.tool-nav-item:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.tool-nav-item.active {
+  background: var(--accent-primary);
   border-color: var(--accent-primary);
-  transform: translateY(-6px) scale(1.03);
-  box-shadow:
-    0 16px 32px rgba(66, 153, 225, 0.25),
-    0 0 0 1px rgba(66, 153, 225, 0.1) inset;
+  color: white;
 }
 
-.tool-card:hover::before {
-  opacity: 1;
+.tool-nav-item.active .tool-name,
+.tool-nav-item.active .tool-desc {
+  color: white;
 }
 
-.theme-dark .tool-card:hover {
-  background: rgba(19, 47, 76, 0.8);
-}
-
-.tool-card:active {
-  transform: translateY(-4px) scale(1.01);
-}
-
-.tool-card-placeholder {
+.tool-nav-item:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tool-card-placeholder:hover {
-  transform: none;
-  border-color: var(--glass-border);
-  background: var(--glass-bg);
-  box-shadow: var(--glass-shadow);
-}
-
-.tool-icon {
-  font-size: 48px;
+.tool-nav-item .tool-icon {
+  font-size: 24px;
   line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  flex-shrink: 0;
 }
 
-.tool-name {
-  font-size: 16px;
+.tool-nav-item .tool-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.tool-nav-item .tool-name {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   transition: color 0.2s ease;
-  margin-top: 4px;
 }
 
-.tool-desc {
-  font-size: 12px;
+.tool-nav-item .tool-desc {
+  font-size: 11px;
   color: var(--text-tertiary);
   transition: color 0.2s ease;
+}
+
+/* 右侧工具内容区域 */
+.tools-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tools-content .page {
+  display: none;
+  flex: 1;
+  overflow-y: scroll !important;
+  overflow-x: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+.tools-content .page.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: scroll !important;
+}
+
+/* 工具网格（已废弃，保留以防兼容性问题） */
+.tools-grid {
+  display: none;
+}
+
+/* 旧的工具卡片样式（已废弃） */
+.tool-card {
+  display: none;
 }
 
 /* 页面容器 */
 .page {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll !important;
+  overflow-x: hidden;
   background: var(--bg-primary);
+  min-height: 0;
 }
 
 .tool-page {
-  padding: 20px;
-  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+  overflow-y: scroll !important;
 }
 
 @keyframes slideIn {
@@ -312,7 +339,16 @@ body {
 }
 
 .tool-content {
-  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
+  overflow-y: scroll !important;
+  overflow-x: hidden;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
 }
 
 /* Tab 内容（保留用于兼容） */
@@ -358,6 +394,7 @@ textarea, input[type="text"], select {
   resize: vertical;
   transition: all 0.3s ease;
   box-shadow: var(--glass-shadow);
+  box-sizing: border-box;
 }
 
 textarea {
@@ -447,6 +484,7 @@ button.secondary-btn svg {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .input-group {
@@ -502,6 +540,71 @@ button.secondary-btn svg {
 .theme-dark .json-number { color: #fca5a5; }
 .theme-dark .json-boolean { color: #93c5fd; }
 .theme-dark .json-null { color: #94a3b8; }
+
+/* JSON 可折叠样式 */
+.json-collapsible {
+  display: inline;
+}
+
+.json-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 4px;
+  transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  border: 1px solid var(--border-color);
+}
+
+.json-toggle:hover {
+  color: var(--accent-primary);
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.json-bracket {
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.json-count {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  margin-left: 6px;
+  font-style: italic;
+}
+
+.json-content {
+  display: block;
+  margin-left: 0;
+}
+
+.json-line {
+  display: block;
+  line-height: 1.6;
+}
+
+.json-indent {
+  white-space: pre;
+}
+
+.json-colon {
+  color: var(--text-secondary);
+}
+
+.json-comma {
+  color: var(--text-secondary);
+}
 
 /* 时间戳转换 */
 .result-box {
@@ -559,6 +662,12 @@ button.secondary-btn svg {
 
 .encoder-side textarea {
   min-height: 150px;
+}
+
+/* 颜色工具页面 - 确保可以滚动 */
+#color-page .tool-content {
+  overflow-y: scroll !important;
+  max-height: 100%;
 }
 
 /* 颜色取色器 - 独特的卡片式布局 */

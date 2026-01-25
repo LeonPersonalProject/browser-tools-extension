@@ -2,6 +2,27 @@
 console.log('=== popup.js 开始加载 ===');
 console.log('当前 URL:', window.location.href);
 
+// 只在popup页面设置固定尺寸，fullpage页面使用CSS的vw/vh
+const isFullpage = window.location.pathname.includes('fullpage.html');
+console.log('是否为全屏页面:', isFullpage);
+
+if (!isFullpage) {
+  // 设置popup为浏览器允许的最大尺寸
+  // Chrome/Edge最大约800x600，我们设置为这个安全值
+  try {
+    document.body.style.width = '800px';
+    document.body.style.height = '600px';
+    document.body.style.minHeight = '600px';
+    document.body.style.maxHeight = '600px';
+
+    console.log('✓ 已设置popup为最大尺寸: 800x600');
+  } catch (e) {
+    console.error('设置popup尺寸失败:', e);
+  }
+} else {
+  console.log('✓ 全屏页面，使用CSS的80vw×80vh尺寸');
+}
+
 import { jsonFormatter } from './utils/jsonFormatter.js';
 import { timestamp } from './utils/timestamp.js';
 import { encoder } from './utils/encoder.js';
@@ -15,11 +36,10 @@ console.log('colorPicker:', colorPicker);
 
 // 页面导航管理
 const pageManager = {
-  currentPage: 'tools',
+  currentPage: 'json',
 
   // 页面标题映射
   pageTitles: {
-    'tools': '开发者工具箱',
     'json': 'JSON 格式化',
     'timestamp': '时间戳转换',
     'encoder': '编码解码',
@@ -30,15 +50,15 @@ const pageManager = {
   showPage(pageName) {
     console.log('切换到页面:', pageName);
 
-    // 隐藏所有页面
-    document.querySelectorAll('.page').forEach(page => {
-      page.style.display = 'none';
+    // 隐藏所有工具页面
+    document.querySelectorAll('.tools-content .page').forEach(page => {
+      page.classList.remove('active');
     });
 
     // 显示目标页面
     const targetPage = document.getElementById(`${pageName}-page`);
     if (targetPage) {
-      targetPage.style.display = 'block';
+      targetPage.classList.add('active');
       this.currentPage = pageName;
 
       // 更新标题
@@ -47,17 +67,15 @@ const pageManager = {
         pageTitle.textContent = this.pageTitles[pageName] || '开发者工具箱';
       }
 
-      // 显示/隐藏返回按钮
-      const backBtn = document.getElementById('back-btn');
-      if (backBtn) {
-        backBtn.style.display = pageName === 'tools' ? 'none' : 'flex';
+      // 更新导航激活状态
+      document.querySelectorAll('.tool-nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      const activeNavItem = document.querySelector(`.tool-nav-item[data-tool="${pageName}"]`);
+      if (activeNavItem) {
+        activeNavItem.classList.add('active');
       }
     }
-  },
-
-  // 返回工具列表
-  backToTools() {
-    this.showPage('tools');
   }
 };
 
@@ -149,6 +167,7 @@ function initSettings() {
   const settingsBtn = document.getElementById('settings-btn');
   const settingsPanel = document.getElementById('settings-panel');
   const closeSettings = document.getElementById('close-settings');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
 
   if (!settingsBtn || !settingsPanel || !closeSettings) {
     console.error('找不到设置面板相关元素');
@@ -164,51 +183,52 @@ function initSettings() {
     console.log('关闭设置面板');
     settingsPanel.classList.remove('show');
   });
+
+  // 全屏打开按钮
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+      console.log('打开全屏页面');
+      chrome.tabs.create({ url: 'fullpage.html' });
+    });
+  }
 }
 
-// Tab 切换（工具卡片） - 改为页面导航
+// Tab 切换（工具导航项）
 function initTabs() {
-  console.log('=== 开始初始化工具卡片导航 ===');
-  const toolCards = document.querySelectorAll('.tool-card:not(.tool-card-placeholder)');
+  console.log('=== 开始初始化工具导航 ===');
+  const navItems = document.querySelectorAll('.tool-nav-item:not([disabled])');
 
-  console.log('找到工具卡片数量:', toolCards.length);
-  console.log('工具卡片列表:', toolCards);
+  console.log('找到导航项数量:', navItems.length);
+  console.log('导航项列表:', navItems);
 
-  if (toolCards.length === 0) {
-    console.error('❌ 找不到工具卡片元素');
-    console.log('所有 .tool-card 元素:', document.querySelectorAll('.tool-card'));
+  if (navItems.length === 0) {
+    console.error('❌ 找不到导航项元素');
+    console.log('所有 .tool-nav-item 元素:', document.querySelectorAll('.tool-nav-item'));
     return;
   }
 
-  console.log('✓ 找到', toolCards.length, '个工具卡片');
+  console.log('✓ 找到', navItems.length, '个导航项');
 
-  toolCards.forEach((card, index) => {
-    const toolName = card.dataset.tool;
-    console.log(`  [${index}] 卡片:`, toolName, card);
+  navItems.forEach((item, index) => {
+    const toolName = item.dataset.tool;
+    console.log(`  [${index}] 导航项:`, toolName, item);
 
-    card.addEventListener('click', () => {
-      console.log('🔄 工具卡片被点击！');
+    item.addEventListener('click', () => {
+      console.log('🔄 导航项被点击！');
       console.log('  - 工具:', toolName);
-      console.log('  - 元素:', card);
+      console.log('  - 元素:', item);
 
       // 切换到对应的工具页面
       pageManager.showPage(toolName);
     });
 
-    console.log(`  ✓ 卡片 [${toolName}] 事件监听器已绑定`);
+    console.log(`  ✓ 导航项 [${toolName}] 事件监听器已绑定`);
   });
 
-  // 绑定返回按钮
-  const backBtn = document.getElementById('back-btn');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      console.log('🔙 返回工具列表');
-      pageManager.backToTools();
-    });
-    console.log('✓ 返回按钮事件监听器已绑定');
-  }
+  console.log('✓ 所有导航项已绑定');
 
-  console.log('✓ 所有工具卡片导航已绑定');
+  // 初始化显示第一个页面（JSON）
+  pageManager.showPage('json');
 }
 
 // JSON 格式化功能
@@ -235,15 +255,41 @@ function initJsonFormatter() {
     const result = jsonFormatter.format(text);
     if (result.success) {
       lastFormattedJson = result.result;
-      output.innerHTML = jsonFormatter.highlight(result.result);
+      // 使用可折叠渲染
+      output.innerHTML = jsonFormatter.renderCollapsible(result.parsed);
       errorMsg.textContent = '';
       console.log('JSON 格式化成功');
+
+      // 绑定折叠/展开事件
+      bindToggleEvents();
     } else {
       errorMsg.textContent = '错误：' + result.error;
       output.textContent = '';
       lastFormattedJson = '';
     }
   });
+
+  // 绑定折叠/展开事件
+  function bindToggleEvents() {
+    const toggles = output.querySelectorAll('.json-toggle');
+    toggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = toggle.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+
+        if (content) {
+          if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '-';
+          } else {
+            content.style.display = 'none';
+            toggle.textContent = '+';
+          }
+        }
+      });
+    });
+  }
 
   compressBtn.addEventListener('click', () => {
     const text = input.value.trim();
@@ -337,8 +383,13 @@ function initJsonFormatter() {
     lastFormattedJson = '';
   });
 
-  // 点击输出区域也可以复制
-  output.addEventListener('click', () => {
+  // 点击输出区域也可以复制（但不包括折叠按钮）
+  output.addEventListener('click', (e) => {
+    // 如果点击的是折叠按钮或其子元素，不执行复制
+    if (e.target.closest('.json-toggle')) {
+      return;
+    }
+
     if (lastFormattedJson) {
       copyToClipboard(lastFormattedJson);
     }
