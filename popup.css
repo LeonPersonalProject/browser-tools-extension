@@ -1202,7 +1202,7 @@ button.secondary-btn svg {
 }
 
 .format-item:hover::before {
-  transform: scaleX(1);
+  transform: scaleX(0);
 }
 
 .format-item:active {

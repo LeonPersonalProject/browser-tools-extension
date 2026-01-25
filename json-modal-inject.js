@@ -246,6 +246,9 @@
           <button id="json-modal-copy-btn-inject" class="json-modal-btn-inject">
             复制
           </button>
+          <button id="json-modal-clear-btn-inject" class="json-modal-btn-inject">
+            清空
+          </button>
           <button id="json-modal-close-btn-inject" class="json-modal-btn-inject close">
             关闭
           </button>
@@ -280,6 +283,7 @@
   const formatBtn = document.getElementById('json-modal-format-btn-inject');
   const compressBtn = document.getElementById('json-modal-compress-btn-inject');
   const copyBtn = document.getElementById('json-modal-copy-btn-inject');
+  const clearBtn = document.getElementById('json-modal-clear-btn-inject');
   const closeBtn = document.getElementById('json-modal-close-btn-inject');
   const expandAllBtn = document.getElementById('json-modal-expand-all-inject');
   const collapseAllBtn = document.getElementById('json-modal-collapse-all-inject');
@@ -427,6 +431,17 @@
       return;
     }
     copyToClipboard(lastFormattedJson);
+  });
+
+  // 清空按钮
+  clearBtn.addEventListener('click', () => {
+    modalInput.value = '';
+    modalOutput.textContent = '等待格式化...';
+    modalError.classList.remove('show');
+    lastFormattedJson = '';
+    expandAllBtn.style.display = 'none';
+    collapseAllBtn.style.display = 'none';
+    showToast('已清空');
   });
 
   // 关闭按钮
