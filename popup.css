@@ -8,12 +8,13 @@
 html {
   overflow: hidden;
   height: 100%;
+  box-shadow: none !important;
 }
 
 /* 强制移除顶层容器的所有阴影 */
-html, body, .container, .main-content {
+/* html, body, .container, .main-content {
   box-shadow: none !important;
-}
+} */
 
 /* CSS 变量 - 浅色主题（清新淡雅） */
 :root {
@@ -96,7 +97,7 @@ body {
   padding: 0;
   overflow: hidden;
   position: relative;
-  box-shadow: none !important;
+  /* box-shadow: none !important; */
 }
 
 .container {
@@ -106,7 +107,7 @@ body {
   height: 100%;
   overflow: hidden;
   position: relative;
-  box-shadow: none !important;
+  /* box-shadow: none !important; */
 }
 
 /* 头部样式 - 超强毛玻璃效果 */

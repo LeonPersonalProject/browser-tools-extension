@@ -321,7 +321,9 @@ function initJsonFormatter() {
   });
 
   // 大窗口弹窗按钮 - 注入到当前标签页（覆盖整个浏览器视口 90%）
-  modalBtn.addEventListener('click', async () => {
+  // 只在 popup.html 中存在，fullpage.html 中不存在
+  if (modalBtn) {
+    modalBtn.addEventListener('click', async () => {
     console.log('打开 JSON 大窗口（注入到页面，覆盖 90% 浏览器视口）');
 
     try {
@@ -374,7 +376,8 @@ function initJsonFormatter() {
       console.error('❌ 注入失败:', error);
       showToast('打开大窗口失败: ' + error.message);
     }
-  });
+    });
+  }
 
   clearBtn.addEventListener('click', () => {
     input.value = '';

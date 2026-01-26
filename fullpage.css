@@ -12,6 +12,7 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: none;
 }
 
 /* CSS 变量 - 浅色主题（清新淡雅） */
