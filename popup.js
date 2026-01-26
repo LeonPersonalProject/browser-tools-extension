@@ -27,6 +27,7 @@ import { jsonFormatter } from './utils/jsonFormatter.js';
 import { timestamp } from './utils/timestamp.js';
 import { encoder } from './utils/encoder.js';
 import { colorPicker } from './utils/colorPicker.js';
+import { converter } from './utils/converter.js';
 
 console.log('✓ 所有模块导入成功');
 console.log('jsonFormatter:', jsonFormatter);
@@ -43,7 +44,8 @@ const pageManager = {
     'json': 'JSON 格式化',
     'timestamp': '时间戳转换',
     'encoder': '编码解码',
-    'color': '颜色取色器'
+    'color': '颜色取色器',
+    'converter': '进制转换'
   },
 
   // 显示指定页面
@@ -576,6 +578,82 @@ function initColorPicker() {
   updateColorDisplay('#000000');
 }
 
+// 进制转换功能
+function initConverter() {
+  const input = document.getElementById('converter-input');
+  const fromBaseSelect = document.getElementById('converter-from-base');
+  const convertBtn = document.getElementById('converter-convert');
+  const clearBtn = document.getElementById('converter-clear');
+  const errorMsg = document.getElementById('converter-error');
+
+  // 结果显示元素
+  const binaryResult = document.getElementById('converter-binary');
+  const octalResult = document.getElementById('converter-octal');
+  const decimalResult = document.getElementById('converter-decimal');
+  const hexResult = document.getElementById('converter-hexadecimal');
+
+  function updateResults(results) {
+    binaryResult.textContent = results.binary;
+    octalResult.textContent = results.octal;
+    decimalResult.textContent = results.decimal;
+    hexResult.textContent = results.hexadecimal;
+  }
+
+  function performConversion() {
+    const value = input.value.trim();
+    if (!value) {
+      errorMsg.textContent = '请输入要转换的数值';
+      return;
+    }
+
+    const fromBase = parseInt(fromBaseSelect.value);
+    const result = converter.convertToAll(value, fromBase);
+
+    if (result.success) {
+      updateResults(result.results);
+      errorMsg.textContent = '';
+    } else {
+      errorMsg.textContent = result.error;
+    }
+  }
+
+  // 转换按钮点击事件
+  convertBtn.addEventListener('click', performConversion);
+
+  // 输入框回车事件
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performConversion();
+    }
+  });
+
+  // 清空按钮点击事件
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    errorMsg.textContent = '';
+    binaryResult.textContent = '-';
+    octalResult.textContent = '-';
+    decimalResult.textContent = '-';
+    hexResult.textContent = '-';
+  });
+
+  // 点击结果项复制 - 类似颜色工具的实现
+  document.querySelectorAll('.converter-result-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const valueEl = item.querySelector('.result-value');
+      if (valueEl.textContent !== '-') {
+        copyToClipboard(valueEl.textContent);
+
+        // 添加复制成功动画
+        item.classList.add('copied');
+        setTimeout(() => {
+          item.classList.remove('copied');
+        }, 600);
+      }
+    });
+  });
+}
+
 // 初始化所有功能
 document.addEventListener('DOMContentLoaded', () => {
   console.log('');
@@ -643,6 +721,14 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ 颜色取色器初始化完成');
   } catch (e) {
     console.error('❌ 颜色取色器初始化失败:', e);
+    console.error('错误堆栈:', e.stack);
+  }
+
+  try {
+    initConverter();
+    console.log('✅ 进制转换工具初始化完成');
+  } catch (e) {
+    console.error('❌ 进制转换工具初始化失败:', e);
     console.error('错误堆栈:', e.stack);
   }
 
