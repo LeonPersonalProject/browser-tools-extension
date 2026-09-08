@@ -1,263 +1,367 @@
-/* JSON 大窗口 - 注入到页面的样式 */
-/* 覆盖整个浏览器视口的 90% */
-
+/* Isolated visual system for the JSON viewer injected into web pages. */
 .json-modal-overlay-inject {
+  --jm-surface: #f7f7f6;
+  --jm-raised: #fdfdfc;
+  --jm-muted: #eef0f2;
+  --jm-code: #f1f2f4;
+  --jm-text: #1a1c20;
+  --jm-text-2: #555b65;
+  --jm-text-3: #6b717c;
+  --jm-border: #d6d9df;
+  --jm-border-strong: #bfc4cc;
+  --jm-accent: #c34b37;
+  --jm-accent-hover: #a93f2e;
+  --jm-accent-soft: #f5e3df;
+  --jm-on-accent: #fffaf8;
+  --jm-error: #a92f3d;
+  --jm-error-soft: #f8e6e9;
+  --jm-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC',
+    'Microsoft YaHei', sans-serif;
+  --jm-font-mono: 'SFMono-Regular', 'Cascadia Code', 'Roboto Mono', Consolas,
+    monospace;
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
+  z-index: 2147483646 !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
   width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(15, 23, 42, 0.75) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 2147483647 !important;
-  animation: json-modal-fadeIn 0.2s ease !important;
-  padding: 20px !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-}
-
-@keyframes json-modal-fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* 弹窗容器 - 毛玻璃效果 - 90% 视口 */
-.json-modal-container-inject {
-  width: 90vw !important;
-  height: 90vh !important;
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
-  display: flex !important;
-  flex-direction: column !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 4vh 4vw !important;
   overflow: hidden !important;
-  animation: json-modal-slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  background: rgba(15, 17, 21, 0.7) !important;
+  color: var(--jm-text) !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  box-sizing: border-box !important;
+  backdrop-filter: blur(14px) saturate(90%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(90%) !important;
+  animation: json-modal-overlay-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
-@keyframes json-modal-slideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.json-modal-overlay-inject *,
+.json-modal-overlay-inject *::before,
+.json-modal-overlay-inject *::after {
+  box-sizing: border-box !important;
 }
 
-/* 弹窗头部 */
-.json-modal-header-inject {
-  padding: 20px 24px !important;
-  background: rgba(139, 92, 246, 0.05) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+.json-modal-container-inject {
+  position: relative !important;
   display: flex !important;
-  justify-content: space-between !important;
+  width: min(1480px, 92vw) !important;
+  height: min(900px, 92dvh) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--jm-border) !important;
+  border-radius: 18px !important;
+  background: var(--jm-surface) !important;
+  color: var(--jm-text) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.38) !important;
+  animation: json-modal-window-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+.json-modal-container-inject::before {
+  position: absolute !important;
+  z-index: 5 !important;
+  inset: 0 auto 0 0 !important;
+  width: 4px !important;
+  border-radius: 18px 0 0 18px !important;
+  background: var(--jm-accent) !important;
+  content: '' !important;
+  pointer-events: none !important;
+}
+
+.json-modal-header-inject {
+  display: flex !important;
+  min-height: 76px !important;
+  flex: 0 0 auto !important;
   align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  margin: 0 !important;
+  padding: 14px 18px 14px 22px !important;
+  border-bottom: 1px solid var(--jm-border) !important;
+  background: var(--jm-surface) !important;
+}
+
+.json-modal-title-inject,
+.json-modal-actions-inject {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
 }
 
 .json-modal-title-inject {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
+  min-width: 0 !important;
+  gap: 10px !important;
 }
 
 .json-modal-icon-inject {
-  font-size: 24px !important;
+  display: grid !important;
+  width: 36px !important;
+  height: 36px !important;
+  flex: 0 0 36px !important;
+  place-items: center !important;
+  border: 1px solid var(--jm-accent) !important;
+  border-radius: 9px !important;
+  background: var(--jm-accent) !important;
+  color: var(--jm-on-accent) !important;
+  font: 700 11px/1 var(--jm-font-mono) !important;
 }
 
 .json-modal-title-inject h2 {
   margin: 0 !important;
-  font-size: 20px !important;
-  font-weight: 600 !important;
-  color: #1e293b !important;
+  padding: 0 !important;
+  color: var(--jm-text) !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 18px !important;
+  font-weight: 680 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.2 !important;
 }
 
 .json-modal-subtitle-inject {
-  font-size: 12px !important;
-  color: #64748b !important;
-  background: rgba(139, 92, 246, 0.1) !important;
-  padding: 4px 10px !important;
-  border-radius: 12px !important;
+  margin-left: 3px !important;
+  color: var(--jm-text-3) !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 10px !important;
   font-weight: 500 !important;
+  white-space: nowrap !important;
 }
 
 .json-modal-actions-inject {
-  display: flex !important;
-  gap: 8px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
 }
 
-/* 弹窗按钮 */
 .json-modal-btn-inject {
-  padding: 8px 14px !important;
-  background: rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(139, 92, 246, 0.2) !important;
-  color: #1e293b !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
+  all: unset !important;
   display: inline-flex !important;
+  min-height: 34px !important;
   align-items: center !important;
-  gap: 6px !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--jm-border) !important;
+  border-radius: 9px !important;
+  background: var(--jm-raised) !important;
+  color: var(--jm-text-2) !important;
+  cursor: pointer !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
   white-space: nowrap !important;
-  font-family: inherit !important;
+  transition: background-color 180ms ease, border-color 180ms ease,
+    color 180ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .json-modal-btn-inject:hover {
-  background: rgba(139, 92, 246, 0.1) !important;
-  border-color: rgba(139, 92, 246, 0.4) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2) !important;
+  border-color: var(--jm-border-strong) !important;
+  background: var(--jm-muted) !important;
+  color: var(--jm-text) !important;
+}
+
+.json-modal-btn-inject:focus-visible {
+  outline: 3px solid rgba(195, 75, 55, 0.26) !important;
+  outline-offset: 2px !important;
+}
+
+.json-modal-btn-inject:active {
+  transform: scale(0.97) !important;
 }
 
 .json-modal-btn-inject.primary {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.9)) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
+  border-color: var(--jm-accent) !important;
+  background: var(--jm-accent) !important;
+  color: var(--jm-on-accent) !important;
 }
 
 .json-modal-btn-inject.primary:hover {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 1), rgba(109, 40, 217, 1)) !important;
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+  border-color: var(--jm-accent-hover) !important;
+  background: var(--jm-accent-hover) !important;
+  color: var(--jm-on-accent) !important;
 }
 
 .json-modal-btn-inject.close {
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
-  color: #ef4444 !important;
+  border-color: var(--jm-border-strong) !important;
+  color: var(--jm-text) !important;
 }
 
-.json-modal-btn-inject.close:hover {
-  background: rgba(239, 68, 68, 0.2) !important;
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
-}
-
-.json-modal-btn-inject svg {
-  width: 16px !important;
-  height: 16px !important;
-}
-
-/* 弹窗内容区 */
 .json-modal-content-inject {
+  display: grid !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   flex: 1 !important;
-  display: flex !important;
-  gap: 16px !important;
-  padding: 20px 24px !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 18px 20px 20px 24px !important;
   overflow: hidden !important;
+  background: var(--jm-muted) !important;
 }
 
 .json-modal-panel-inject {
-  flex: 1 !important;
   display: flex !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   flex-direction: column !important;
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(139, 92, 246, 0.1) !important;
-  border-radius: 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--jm-border) !important;
+  border-radius: 14px !important;
+  background: var(--jm-raised) !important;
 }
 
 .json-modal-panel-header-inject {
-  padding: 12px 16px !important;
-  background: rgba(139, 92, 246, 0.08) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #475569 !important;
+  min-height: 42px !important;
+  flex: 0 0 42px !important;
+  margin: 0 !important;
+  padding: 12px 15px !important;
+  border-bottom: 1px solid var(--jm-border) !important;
+  background: var(--jm-raised) !important;
+  color: var(--jm-text-2) !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1.5 !important;
+}
+
+.json-modal-textarea-inject,
+.json-modal-output-inject {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  overflow: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: var(--jm-code) !important;
+  color: var(--jm-text) !important;
+  font-family: var(--jm-font-mono) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.7 !important;
+  text-align: left !important;
+  white-space: pre !important;
+  box-shadow: none !important;
 }
 
 .json-modal-textarea-inject {
-  flex: 1 !important;
-  padding: 16px !important;
-  border: none !important;
-  background: transparent !important;
-  color: #1e293b !important;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
-  font-size: 13px !important;
-  line-height: 1.6 !important;
   resize: none !important;
-  outline: none !important;
+}
+
+.json-modal-textarea-inject:focus {
+  box-shadow: inset 0 0 0 2px var(--jm-accent) !important;
 }
 
 .json-modal-textarea-inject::placeholder {
-  color: #94a3b8 !important;
+  color: var(--jm-text-3) !important;
+  opacity: 1 !important;
 }
 
 .json-modal-output-inject {
-  flex: 1 !important;
-  padding: 16px !important;
-  overflow: auto !important;
-  background: transparent !important;
-  color: #1e293b !important;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
-  font-size: 13px !important;
-  line-height: 1.6 !important;
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  cursor: pointer !important;
+  cursor: copy !important;
 }
 
-.json-modal-output-inject:hover {
-  background: rgba(139, 92, 246, 0.02) !important;
-}
-
-/* 错误提示 */
 .json-modal-error-inject {
-  padding: 12px 24px !important;
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-top: 1px solid rgba(239, 68, 68, 0.2) !important;
-  color: #ef4444 !important;
-  font-size: 13px !important;
   display: none !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 10px 24px !important;
+  border-top: 1px solid var(--jm-error) !important;
+  background: var(--jm-error-soft) !important;
+  color: var(--jm-error) !important;
+  font-family: var(--jm-font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
 }
 
 .json-modal-error-inject.show {
   display: block !important;
 }
 
-/* JSON 语法高亮 */
 .json-modal-output-inject .json-key {
-  color: #8b5cf6 !important;
-  font-weight: 600 !important;
+  color: #2c60a3 !important;
+  font-weight: 650 !important;
 }
 
-.json-modal-output-inject .json-string {
-  color: #10b981 !important;
+.json-modal-output-inject .json-string { color: #27734d !important; }
+.json-modal-output-inject .json-number { color: #a64d2d !important; }
+.json-modal-output-inject .json-boolean { color: #7853a6 !important; }
+.json-modal-output-inject .json-null,
+.json-modal-output-inject .json-count,
+.json-modal-output-inject .json-comma,
+.json-modal-output-inject .json-colon { color: var(--jm-text-3) !important; }
+.json-modal-output-inject .json-bracket {
+  color: var(--jm-text-2) !important;
+  font-weight: 650 !important;
 }
 
-.json-modal-output-inject .json-number {
-  color: #f59e0b !important;
+.json-modal-output-inject .json-content {
+  margin-left: 15px !important;
+  padding-left: 9px !important;
+  border-left: 1px solid var(--jm-border) !important;
 }
 
-.json-modal-output-inject .json-boolean {
-  color: #3b82f6 !important;
-  font-weight: 600 !important;
+.json-modal-output-inject .json-toggle {
+  display: inline-grid !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 4px 0 0 !important;
+  place-items: center !important;
+  border: 1px solid var(--jm-border-strong) !important;
+  border-radius: 4px !important;
+  background: var(--jm-raised) !important;
+  color: var(--jm-text-2) !important;
+  cursor: pointer !important;
+  font: 600 10px/1 var(--jm-font-mono) !important;
 }
 
-.json-modal-output-inject .json-null {
-  color: #6b7280 !important;
-  font-style: italic !important;
+.json-modal-output-inject .json-toggle:hover {
+  border-color: var(--jm-accent) !important;
+  color: var(--jm-accent) !important;
 }
 
-/* 滚动条样式 */
+.json-modal-toast-inject {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  top: 20px !important;
+  left: 50% !important;
+  max-width: min(360px, calc(100vw - 32px)) !important;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  border: 1px solid #3d424a !important;
+  border-radius: 9px !important;
+  background: #1a1c20 !important;
+  color: #fdfdfc !important;
+  box-shadow: 0 16px 46px rgba(0, 0, 0, 0.28) !important;
+  font: 650 11px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  opacity: 1 !important;
+  transform: translate(-50%, 0) !important;
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.json-modal-toast-inject.hide {
+  opacity: 0 !important;
+  transform: translate(-50%, -8px) !important;
+}
+
+.json-modal-textarea-inject,
+.json-modal-output-inject {
+  scrollbar-color: var(--jm-border-strong) transparent !important;
+  scrollbar-width: thin !important;
+}
+
 .json-modal-textarea-inject::-webkit-scrollbar,
 .json-modal-output-inject::-webkit-scrollbar {
   width: 8px !important;
@@ -266,85 +370,102 @@
 
 .json-modal-textarea-inject::-webkit-scrollbar-track,
 .json-modal-output-inject::-webkit-scrollbar-track {
-  background: rgba(139, 92, 246, 0.05) !important;
-  border-radius: 4px !important;
+  background: transparent !important;
 }
 
 .json-modal-textarea-inject::-webkit-scrollbar-thumb,
 .json-modal-output-inject::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3) !important;
-  border-radius: 4px !important;
+  border: 2px solid transparent !important;
+  border-radius: 999px !important;
+  background: var(--jm-border-strong) !important;
+  background-clip: padding-box !important;
 }
 
-.json-modal-textarea-inject::-webkit-scrollbar-thumb:hover,
-.json-modal-output-inject::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5) !important;
+@keyframes json-modal-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* JSON 可折叠样式 */
-.json-modal-output-inject .json-collapsible {
-  display: inline-block !important;
+@keyframes json-modal-window-in {
+  from { opacity: 0; transform: scale(0.985) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.json-modal-output-inject .json-toggle {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  user-select: none !important;
-  color: #64748b !important;
-  font-size: 14px !important;
-  font-weight: bold !important;
-  margin-right: 4px !important;
-  transition: all 0.2s ease !important;
-  width: 16px !important;
-  height: 16px !important;
-  text-align: center !important;
-  background: rgba(139, 92, 246, 0.08) !important;
-  border-radius: 3px !important;
-  border: 1px solid rgba(139, 92, 246, 0.2) !important;
-  pointer-events: auto !important;
-  z-index: 10 !important;
-  position: relative !important;
+@media (prefers-color-scheme: dark) {
+  .json-modal-overlay-inject {
+    --jm-surface: #15181d;
+    --jm-raised: #1b1f25;
+    --jm-muted: #20242b;
+    --jm-code: #101318;
+    --jm-text: #f0f1f3;
+    --jm-text-2: #a4a9b2;
+    --jm-text-3: #8a919c;
+    --jm-border: #2c3139;
+    --jm-border-strong: #424852;
+    --jm-accent-soft: #35211f;
+    --jm-error: #ff8d99;
+    --jm-error-soft: #3b2026;
+    background: rgba(5, 7, 10, 0.76) !important;
+  }
+
+  .json-modal-output-inject .json-key { color: #83afe8 !important; }
+  .json-modal-output-inject .json-string { color: #82cda6 !important; }
+  .json-modal-output-inject .json-number { color: #eaa081 !important; }
+  .json-modal-output-inject .json-boolean { color: #b8a0e1 !important; }
 }
 
-.json-modal-output-inject .json-toggle:hover {
-  color: #8b5cf6 !important;
-  background: rgba(139, 92, 246, 0.15) !important;
-  border-color: #8b5cf6 !important;
-  transform: scale(1.1) !important;
+@media (max-width: 860px) {
+  .json-modal-overlay-inject {
+    padding: 0 !important;
+  }
+
+  .json-modal-container-inject {
+    width: 100vw !important;
+    height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .json-modal-container-inject::before {
+    border-radius: 0 !important;
+  }
+
+  .json-modal-header-inject {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .json-modal-actions-inject {
+    justify-content: flex-start !important;
+  }
+
+  .json-modal-content-inject {
+    grid-template-columns: 1fr !important;
+    overflow: auto !important;
+  }
+
+  .json-modal-panel-inject {
+    min-height: 300px !important;
+  }
 }
 
-.json-modal-output-inject .json-bracket {
-  color: #64748b !important;
-  font-weight: bold !important;
+@media (prefers-reduced-motion: reduce) {
+  .json-modal-overlay-inject,
+  .json-modal-container-inject,
+  .json-modal-overlay-inject *,
+  .json-modal-overlay-inject *::before,
+  .json-modal-overlay-inject *::after,
+  .json-modal-toast-inject {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.json-modal-output-inject .json-count {
-  color: #94a3b8 !important;
-  font-size: 11px !important;
-  margin-left: 6px !important;
-  font-style: italic !important;
-}
-
-.json-modal-output-inject .json-content {
-  display: block !important;
-  margin-left: 0 !important;
-}
-
-.json-modal-output-inject .json-line {
-  display: block !important;
-  line-height: 1.6 !important;
-}
-
-.json-modal-output-inject .json-indent {
-  white-space: pre !important;
-}
-
-.json-modal-output-inject .json-colon {
-  color: #64748b !important;
-}
-
-.json-modal-output-inject .json-comma {
-  color: #64748b !important;
+@media (prefers-reduced-transparency: reduce) {
+  .json-modal-overlay-inject {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }

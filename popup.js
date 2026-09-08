@@ -2,7 +2,7 @@
 console.log('=== popup.js 开始加载 ===');
 console.log('当前 URL:', window.location.href);
 
-// 只在popup页面设置固定尺寸，fullpage页面使用CSS的vw/vh
+// 只在 popup 页面设置固定尺寸，全屏页面由 CSS 自适应视口
 const isFullpage = window.location.pathname.includes('fullpage.html');
 console.log('是否为全屏页面:', isFullpage);
 
@@ -20,7 +20,7 @@ if (!isFullpage) {
     console.error('设置popup尺寸失败:', e);
   }
 } else {
-  console.log('✓ 全屏页面，使用CSS的80vw×80vh尺寸');
+  console.log('✓ 全屏页面，使用自适应视口尺寸');
 }
 
 import { jsonFormatter } from './utils/jsonFormatter.js';
@@ -55,12 +55,14 @@ const pageManager = {
     // 隐藏所有工具页面
     document.querySelectorAll('.tools-content .page').forEach(page => {
       page.classList.remove('active');
+      page.setAttribute('aria-hidden', 'true');
     });
 
     // 显示目标页面
     const targetPage = document.getElementById(`${pageName}-page`);
     if (targetPage) {
       targetPage.classList.add('active');
+      targetPage.setAttribute('aria-hidden', 'false');
       this.currentPage = pageName;
 
       // 更新标题
@@ -72,10 +74,12 @@ const pageManager = {
       // 更新导航激活状态
       document.querySelectorAll('.tool-nav-item').forEach(item => {
         item.classList.remove('active');
+        item.removeAttribute('aria-current');
       });
       const activeNavItem = document.querySelector(`.tool-nav-item[data-tool="${pageName}"]`);
       if (activeNavItem) {
         activeNavItem.classList.add('active');
+        activeNavItem.setAttribute('aria-current', 'page');
       }
     }
   }
@@ -111,6 +115,18 @@ async function copyToClipboard(text) {
   }
 }
 
+// 让非按钮的可点击结果支持键盘操作
+function enableKeyboardClick(element) {
+  element.setAttribute('role', 'button');
+  element.setAttribute('tabindex', '0');
+  element.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      element.click();
+    }
+  });
+}
+
 // 主题切换
 function initTheme() {
   console.log('=== 开始初始化主题 ===');
@@ -144,7 +160,7 @@ function initTheme() {
 
   // 监听主题切换
   themeToggle.addEventListener('change', (e) => {
-    console.log('🎨 主题切换事件触发！');
+    console.log('主题切换事件触发');
     console.log('  - checked:', e.target.checked);
     console.log('  - event:', e);
 
@@ -176,14 +192,29 @@ function initSettings() {
     return;
   }
 
-  settingsBtn.addEventListener('click', () => {
+  const openSettings = () => {
     console.log('打开设置面板');
     settingsPanel.classList.add('show');
-  });
+    settingsPanel.setAttribute('aria-hidden', 'false');
+    settingsBtn.setAttribute('aria-expanded', 'true');
+    closeSettings.focus();
+  };
 
-  closeSettings.addEventListener('click', () => {
+  const hideSettings = () => {
     console.log('关闭设置面板');
     settingsPanel.classList.remove('show');
+    settingsPanel.setAttribute('aria-hidden', 'true');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+    settingsBtn.focus();
+  };
+
+  settingsBtn.addEventListener('click', openSettings);
+  closeSettings.addEventListener('click', hideSettings);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && settingsPanel.classList.contains('show')) {
+      hideSettings();
+    }
   });
 
   // 全屏打开按钮
@@ -399,6 +430,7 @@ function initJsonFormatter() {
       copyToClipboard(lastFormattedJson);
     }
   });
+  enableKeyboardClick(output);
 }
 
 // 时间戳转换功能
@@ -450,13 +482,15 @@ function initTimestamp() {
     timestampInput.dispatchEvent(new Event('input'));
   });
 
-  // 点击结果复制
-  [localTime, utcTime, timestampSec, timestampMs].forEach(el => {
-    el.addEventListener('click', () => {
-      if (el.textContent !== '-') {
-        copyToClipboard(el.textContent);
+  // 点击或聚焦结果项后复制
+  document.querySelectorAll('#timestamp-page .result-item').forEach(item => {
+    const value = item.querySelector('.value');
+    item.addEventListener('click', () => {
+      if (value.textContent !== '-') {
+        copyToClipboard(value.textContent);
       }
     });
+    enableKeyboardClick(item);
   });
 }
 
@@ -545,6 +579,7 @@ function initColorPicker() {
   colorPreview.addEventListener('click', () => {
     colorInput.click();
   });
+  enableKeyboardClick(colorPreview);
 
   // 取色器变化
   colorInput.addEventListener('input', (e) => {
@@ -572,6 +607,7 @@ function initColorPicker() {
         item.classList.remove('copied');
       }, 600);
     });
+    enableKeyboardClick(item);
   });
 
   // 初始化显示
@@ -651,6 +687,7 @@ function initConverter() {
         }, 600);
       }
     });
+    enableKeyboardClick(item);
   });
 }
 

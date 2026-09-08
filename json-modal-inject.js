@@ -162,27 +162,13 @@
   function showToast(message) {
     const toast = document.createElement('div');
     toast.textContent = message;
-    toast.style.cssText = `
-      position: fixed !important;
-      top: 20px !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      background: rgba(139, 92, 246, 0.95) !important;
-      color: white !important;
-      padding: 12px 24px !important;
-      border-radius: 8px !important;
-      font-size: 14px !important;
-      font-weight: 500 !important;
-      z-index: 2147483647 !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-      animation: toast-slideIn 0.3s ease !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    `;
+    toast.className = 'json-modal-toast-inject';
+    toast.setAttribute('role', 'status');
     document.body.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.animation = 'toast-slideOut 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
+      toast.classList.add('hide');
+      setTimeout(() => toast.remove(), 240);
     }, 2000);
   }
 
@@ -221,13 +207,16 @@
   const overlay = document.createElement('div');
   overlay.id = 'json-modal-overlay-inject';
   overlay.className = 'json-modal-overlay-inject';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'json-modal-title-inject');
 
   overlay.innerHTML = `
     <div class="json-modal-container-inject">
       <div class="json-modal-header-inject">
         <div class="json-modal-title-inject">
-          <span class="json-modal-icon-inject">📋</span>
-          <h2>JSON 查看器</h2>
+          <span class="json-modal-icon-inject" aria-hidden="true">{ }</span>
+          <h2 id="json-modal-title-inject">JSON 查看器</h2>
           <span class="json-modal-subtitle-inject">支持 Python 字典格式</span>
         </div>
         <div class="json-modal-actions-inject">
@@ -270,7 +259,7 @@
           <div id="json-modal-output-inject" class="json-modal-output-inject">等待格式化...</div>
         </div>
       </div>
-      <div id="json-modal-error-msg-inject" class="json-modal-error-inject"></div>
+      <div id="json-modal-error-msg-inject" class="json-modal-error-inject" role="alert"></div>
     </div>
   `;
 

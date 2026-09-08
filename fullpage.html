@@ -6,64 +6,67 @@
   <title>开发者工具箱</title>
   <link rel="stylesheet" href="fullpage.css">
 </head>
-<body class="theme-dark">
+<body class="theme-dark fullpage-view">
   <div class="container">
-    <!-- 头部 Logo 和设置 -->
-    <div class="header">
+    <!-- 顶部品牌栏 -->
+    <header class="header">
       <div class="logo-section">
-        <img src="assets/icon-128.png" alt="Logo" class="logo">
-        <h1 class="title" id="page-title">开发者工具箱</h1>
+        <img src="assets/icon-128.png" alt="开发者工具箱" class="logo">
+        <div class="title-group">
+          <span class="brand-name">开发者工具箱</span>
+          <h1 class="title" id="page-title">JSON 格式化</h1>
+        </div>
       </div>
 
-      <button class="settings-btn" id="settings-btn" title="设置">
+      <button class="settings-btn" id="settings-btn" title="设置" aria-label="打开设置" aria-expanded="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1m18.2 5.2l-4.2-4.2m0-6l4.2-4.2"></path>
         </svg>
       </button>
-    </div>
+    </header>
 
     <!-- 主内容区域：左侧导航 + 右侧工具页面 -->
     <div class="main-content">
       <!-- 左侧工具导航 -->
-      <nav class="tools-nav">
-        <button class="tool-nav-item active" data-tool="json">
-          <div class="tool-icon">📋</div>
+      <nav class="tools-nav" aria-label="开发工具">
+        <button class="tool-nav-item active" data-tool="json" aria-current="page">
+          <div class="tool-icon" aria-hidden="true">{ }</div>
           <div class="tool-info">
             <div class="tool-name">JSON</div>
             <div class="tool-desc">格式化与压缩</div>
           </div>
         </button>
         <button class="tool-nav-item" data-tool="timestamp">
-          <div class="tool-icon">⏰</div>
+          <div class="tool-icon" aria-hidden="true">TS</div>
           <div class="tool-info">
             <div class="tool-name">时间戳</div>
             <div class="tool-desc">时间转换</div>
           </div>
         </button>
         <button class="tool-nav-item" data-tool="encoder">
-          <div class="tool-icon">🔐</div>
+          <div class="tool-icon" aria-hidden="true">Aa</div>
           <div class="tool-info">
             <div class="tool-name">编码</div>
             <div class="tool-desc">编码解码</div>
           </div>
         </button>
         <button class="tool-nav-item" data-tool="color">
-          <div class="tool-icon">🎨</div>
+          <div class="tool-icon" aria-hidden="true">#</div>
           <div class="tool-info">
             <div class="tool-name">颜色</div>
             <div class="tool-desc">取色器</div>
           </div>
         </button>
         <button class="tool-nav-item" data-tool="converter">
-          <div class="tool-icon">🔢</div>
+          <div class="tool-icon" aria-hidden="true">02</div>
           <div class="tool-info">
             <div class="tool-name">进制转换</div>
             <div class="tool-desc">进制互转</div>
           </div>
         </button>
         <button class="tool-nav-item tool-nav-item-placeholder" disabled>
-          <div class="tool-icon">➕</div>
+          <div class="tool-icon" aria-hidden="true">+</div>
           <div class="tool-info">
             <div class="tool-name">更多</div>
             <div class="tool-desc">敬请期待</div>
@@ -76,6 +79,10 @@
         <!-- JSON 工具页面 -->
         <div class="page tool-page active" id="json-page">
           <div class="tool-content">
+            <div class="panel-heading">
+              <label for="json-input">输入内容</label>
+              <span>JSON / Python Dict</span>
+            </div>
             <textarea id="json-input" placeholder="粘贴 JSON 字符串...&#10;支持 Python 字典格式（单引号、True/False/None）"></textarea>
             <div class="button-group">
               <button id="json-format">格式化</button>
@@ -89,8 +96,12 @@
               </button>
               <button id="json-clear" class="secondary-btn">清空</button>
             </div>
-            <div id="json-error" class="error-msg"></div>
-            <div id="json-output" class="output-box"></div>
+            <div id="json-error" class="error-msg" aria-live="polite"></div>
+            <div class="panel-heading output-heading">
+              <span>处理结果</span>
+              <span>点击结果可复制</span>
+            </div>
+            <div id="json-output" class="output-box" tabindex="0" aria-label="JSON 处理结果"></div>
           </div>
         </div>
 
@@ -154,7 +165,7 @@
               <button id="decode-btn">解码</button>
               <button id="encode-clear">清空</button>
             </div>
-            <div id="encode-error" class="error-msg"></div>
+            <div id="encode-error" class="error-msg" aria-live="polite"></div>
           </div>
         </div>
 
@@ -166,7 +177,7 @@
               <div class="color-picker-section">
                 <div class="color-preview-wrapper">
                   <label>选择颜色</label>
-                  <div class="color-preview" id="color-preview"></div>
+                  <div class="color-preview" id="color-preview" aria-label="打开颜色选择器"></div>
                   <input type="color" id="color-input" value="#000000">
                 </div>
                 <div class="input-group">
@@ -248,7 +259,7 @@
                 清空
               </button>
             </div>
-            <div id="converter-error" class="error-msg"></div>
+            <div id="converter-error" class="error-msg" aria-live="polite"></div>
             <div class="converter-results-container">
               <div class="converter-result-item" data-base="binary">
                 <div class="result-label">
@@ -293,13 +304,13 @@
     </div>
 
     <!-- Toast 提示 -->
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <!-- 设置面板 -->
-    <div id="settings-panel" class="settings-panel">
+    <aside id="settings-panel" class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" aria-hidden="true">
       <div class="settings-header">
-        <h2>设置</h2>
-        <button class="close-btn" id="close-settings">✕</button>
+        <h2 id="settings-title">界面设置</h2>
+        <button class="close-btn" id="close-settings" aria-label="关闭设置">×</button>
       </div>
       <div class="settings-content">
         <div class="setting-item">
@@ -313,7 +324,7 @@
           </label>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 
   <script type="module" src="popup.js"></script>
