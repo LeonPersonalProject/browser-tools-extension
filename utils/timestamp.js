@@ -1,108 +1,84 @@
-// 时间戳转换模块
+const maxDate = 8640000000000000;
+const zoneName = zone => zone === 'local' ? Intl.DateTimeFormat().resolvedOptions().timeZone : zone;
+function utcCivil(parts) {
+  const date = new Date(0);
+  date.setUTCFullYear(parts[0], parts[1] - 1, parts[2]);
+  date.setUTCHours(parts[3], parts[4], parts[5], parts[6] || 0);
+  return date;
+}
+function civilParts(date, zone) {
+  const parts = new Intl.DateTimeFormat('en-CA-u-ca-gregory-nu-latn', {
+    timeZone: zoneName(zone), era: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  if (map.era === 'BC') map.year = 1 - Number(map.year);
+  return ['year', 'month', 'day', 'hour', 'minute', 'second'].map(key => Number(map[key]));
+}
 export const timestamp = {
-  // 判断是秒还是毫秒时间戳
-  detectTimestampType(ts) {
-    const num = parseInt(ts);
-    return num > 10000000000 ? 'ms' : 's';
-  },
-
-  // 时间戳转时间
-  timestampToDate(ts) {
+  detectTimestampType(value) { return Math.abs(Number(value)) >= 100000000000 ? 'ms' : 's'; },
+  fromMilliseconds(ms, zone = 'local') {
+    if (!Number.isSafeInteger(ms) || Math.abs(ms) > maxDate) return { success: false, error: '日期超出可表示范围。' };
     try {
-      const num = parseInt(ts);
-      if (isNaN(num)) {
-        return { success: false, error: '无效的时间戳' };
-      }
-
-      const type = this.detectTimestampType(ts);
-      const date = type === 'ms' ? new Date(num) : new Date(num * 1000);
-
-      if (isNaN(date.getTime())) {
-        return { success: false, error: '无效的时间戳' };
-      }
-
-      const localTime = this.formatDateTime(date);
-      const utcTime = this.formatDateTime(date, true);
-      const timestampSec = Math.floor(date.getTime() / 1000);
-      const timestampMs = date.getTime();
-
+      const date = new Date(ms);
       return {
-        success: true,
-        localTime,
-        utcTime,
-        timestampSec,
-        timestampMs
+        success: true, localTime: this.formatDateTime(date, zone), utcTime: this.formatDateTime(date, 'UTC'),
+        iso: date.toISOString(), timestampSec: Math.floor(ms / 1000), timestampMs: ms
       };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    } catch (error) { return { success: false, error: error.message }; }
   },
-
-  // 日期时间转时间戳
-  dateToTimestamp(dateString) {
+  timestampToDate(value, unit = 'auto', zone = 'local') {
+    const text = String(value).trim();
+    if (!/^[+-]?\d+$/.test(text)) return { success: false, error: '请输入完整整数时间戳，不包含小数或其他字符。' };
+    const number = Number(text);
+    if (!Number.isSafeInteger(number)) return { success: false, error: '时间戳超出安全整数范围。' };
+    const detected = unit === 'auto' ? this.detectTimestampType(number) : unit;
+    const result = this.fromMilliseconds(number * (detected === 's' ? 1000 : 1), zone);
+    return { ...result, unit: detected };
+  },
+  dateToTimestamp(value, zone = 'local') {
+    const text = value.trim();
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:\d{2})?$/i);
+    if (!match) return { success: false, error: '使用 YYYY-MM-DD HH:mm:ss，可带毫秒或 Z / ±HH:mm。' };
+    const parts = match.slice(1, 7).map(part => Number(part || 0));
+    parts.push(Number((match[7] || '').padEnd(3, '0')));
+    const civil = utcCivil(parts);
+    const actual = [civil.getUTCFullYear(), civil.getUTCMonth() + 1, civil.getUTCDate(), civil.getUTCHours(), civil.getUTCMinutes(), civil.getUTCSeconds()];
+    if (parts[0] < 1 || actual.some((part, i) => part !== parts[i])) return { success: false, error: '日期或时间无效，请检查月份、天数与时分秒。' };
+    const offset = match[8];
+    if (offset) {
+      let minutes = 0;
+      if (offset.toUpperCase() !== 'Z') {
+        const hours = Number(offset.slice(1, 3));
+        const mins = Number(offset.slice(4));
+        if (hours > 23 || mins > 59) return { success: false, error: '无效的时区偏移。' };
+        minutes = (hours * 60 + mins) * (offset[0] === '-' ? -1 : 1);
+      }
+      return this.fromMilliseconds(civil.getTime() - minutes * 60000, zone);
+    }
     try {
-      // 支持多种格式
-      let date;
-
-      // 尝试 ISO 格式
-      if (dateString.includes('T')) {
-        date = new Date(dateString);
-      } else {
-        // 尝试 YYYY-MM-DD HH:mm:ss 格式
-        const parts = dateString.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
-        if (parts) {
-          date = new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
-        } else {
-          date = new Date(dateString);
-        }
+      // 收集转换日期附近的时区偏移，并回验本地时刻；拒绝 DST 跳跃和重复时间。
+      const offsets = new Set();
+      for (let hour = -36; hour <= 36; hour += 6) {
+        const sample = new Date(civil.getTime() + hour * 3600000);
+        const local = civilParts(sample, zone);
+        offsets.add(utcCivil([...local, sample.getUTCMilliseconds()]).getTime() - sample.getTime());
       }
-
-      if (isNaN(date.getTime())) {
-        return { success: false, error: '无效的日期格式' };
-      }
-
-      const localTime = this.formatDateTime(date);
-      const utcTime = this.formatDateTime(date, true);
-      const timestampSec = Math.floor(date.getTime() / 1000);
-      const timestampMs = date.getTime();
-
-      return {
-        success: true,
-        localTime,
-        utcTime,
-        timestampSec,
-        timestampMs
+      const candidates = [...offsets].map(diff => civil.getTime() - diff).filter(ms => civilParts(new Date(ms), zone).every((part, i) => part === parts[i]));
+      if (candidates.length !== 1) return {
+        success: false,
+        error: candidates.length ? '该时刻因夏令时出现两次，请附上明确偏移，如 -04:00 或 -05:00。' : '该时区中不存在此时刻（可能处于夏令时跳跃），请调整时间。'
       };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+      return this.fromMilliseconds(candidates[0], zone);
+    } catch (error) { return { success: false, error: '无法解析所选时区：' + error.message }; }
   },
-
-  // 格式化日期时间
-  formatDateTime(date, isUTC = false) {
-    const year = isUTC ? date.getUTCFullYear() : date.getFullYear();
-    const month = String(isUTC ? date.getUTCMonth() + 1 : date.getMonth() + 1).padStart(2, '0');
-    const day = String(isUTC ? date.getUTCDate() : date.getDate()).padStart(2, '0');
-    const hours = String(isUTC ? date.getUTCHours() : date.getHours()).padStart(2, '0');
-    const minutes = String(isUTC ? date.getUTCMinutes() : date.getMinutes()).padStart(2, '0');
-    const seconds = String(isUTC ? date.getUTCSeconds() : date.getSeconds()).padStart(2, '0');
-
-    const timezone = isUTC ? 'UTC' : `UTC${this.getTimezoneOffset()}`;
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} (${timezone})`;
+  formatDateTime(date, zone = 'local') {
+    if (zone === true) zone = 'UTC';
+    if (zone === false) zone = 'local';
+    const parts = civilParts(date, zone);
+    const formatted = String(parts[0]).padStart(4, '0') + '-' + parts.slice(1, 3).map(part => String(part).padStart(2, '0')).join('-') + ' ' + parts.slice(3).map(part => String(part).padStart(2, '0')).join(':');
+    const offset = new Intl.DateTimeFormat('en', { timeZone: zoneName(zone), timeZoneName: 'longOffset' }).formatToParts(date).find(part => part.type === 'timeZoneName').value;
+    return formatted + ' (' + offset.replace('GMT', 'UTC') + ')';
   },
-
-  // 获取时区偏移
-  getTimezoneOffset() {
-    const offset = -new Date().getTimezoneOffset() / 60;
-    return offset >= 0 ? `+${offset}` : offset;
-  },
-
-  // 获取当前时间戳
-  getCurrentTimestamp() {
-    const now = new Date();
-    return {
-      timestampSec: Math.floor(now.getTime() / 1000),
-      timestampMs: now.getTime()
-    };
-  }
+  getCurrentTimestamp() { const now = Date.now(); return { timestampSec: Math.floor(now / 1000), timestampMs: now }; }
 };

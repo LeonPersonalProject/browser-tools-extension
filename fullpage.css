@@ -1,106 +1,50 @@
-@import url('./popup.css');
-
-html {
-  min-width: 320px;
-  min-height: 100%;
-  overflow: auto;
-  background: #e7e9ed;
+body.fullpage-view { width: 100%; height: 100dvh; min-height: 0; }
+.fullpage-view { --sidebar-width: 190px; }
+.fullpage-view.sidebar-collapsed { --sidebar-width: 68px; }
+.fullpage-view .sidebar { padding-top: 32px; }
+.fullpage-view .brand { padding-left: 10px; }
+.fullpage-view.sidebar-collapsed .brand { padding-left: 0; }
+.fullpage-view .topbar { padding: 24px 42px 14px; }
+.fullpage-view .tools-content { padding: 0 42px 24px; }
+.fullpage-view .page-heading { padding: 16px 0 36px; }
+.fullpage-view h1 { font-size: 34px; }
+.fullpage-view .page-heading p { font-size: 13px; }
+.fullpage-view .page, .fullpage-view .page-heading, .fullpage-view .workspace-footer { max-width: 1120px; margin-inline: auto; }
+.fullpage-view .toolbar { margin-bottom: 30px; }
+.fullpage-view .two-columns { gap: 32px; }
+.fullpage-view .code-input { height: 330px; font-size: 13px; }
+.fullpage-view .code-output { height: 373px; font-size: 13px; }
+.fullpage-view .paper-heading { font-size: 12px; }
+.fullpage-view .time-date { font-size: 25px; }
+.fullpage-view .time-ticket { padding: 22px; }
+.fullpage-view .time-source { padding: 10px 0; }
+.fullpage-view .ticket-divider { margin-inline: -22px; }
+.fullpage-view .result-row { padding-block: 10px; }
+.fullpage-view .result-row > output { font-size: 12px; }
+.fullpage-view .color-preview { height: 290px; }
+.fullpage-view .number-strip { padding: 16px; }
+.fullpage-view .number-strip output { font-size: 15px; }
+.fullpage-view .password-settings-body { padding: 5px 22px 22px; }
+.fullpage-view .password-types { margin-top: 13px; }
+.fullpage-view .password-output { min-height: 156px; padding: 20px 22px; font-size: 23px; }
+.fullpage-view .password-output.empty { font-size: 12px; }
+.fullpage-view .password-actions { padding: 0 22px 22px; }
+.fullpage-view .password-result .paper-foot { margin-inline: 22px; }
+.fullpage-view .workspace-footer { padding-top: 35px; }
+@media (max-width: 900px) {
+  .fullpage-view .topbar { padding: 16px 22px 10px; }
+  .fullpage-view .tools-content { padding-inline: 22px; }
+  .fullpage-view .two-columns { gap: 22px; }
+  .fullpage-view .code-input { height: 230px; }
+  .fullpage-view .code-output { height: 273px; }
 }
-
-body.fullpage-view {
-  width: 100%;
-  height: 100dvh;
-  min-height: 560px;
-  max-height: none;
-  padding: 24px;
-  overflow: auto;
-  background:
-    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--border) 50%, transparent calc(50% + 0.5px)),
-    var(--app-bg);
+@media (max-width: 530px) {
+  .fullpage-view .topbar, .fullpage-view .tools-content { padding-inline: 14px; }
+  .fullpage-view h1 { font-size: 24px; }
+  .fullpage-view .page-heading p { font-size: 11px; }
 }
-
-body.fullpage-view::before {
-  display: none;
-}
-
-.fullpage-view .container {
-  width: min(1380px, 100%);
-  height: calc(100dvh - 48px);
-  min-height: 512px;
-  margin: 0 auto;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow-app);
-}
-
-.fullpage-view .container::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 70;
-  width: 4px;
-  border-radius: 18px 0 0 18px;
-  background: var(--accent);
-  content: '';
-  pointer-events: none;
-}
-
-.fullpage-view .tools-nav {
-  width: 220px;
-  min-width: 220px;
-  padding: 20px 16px;
-}
-
-.fullpage-view .tool-content {
-  width: min(1040px, 100%);
-  margin: 0 auto;
-  padding: 32px 36px 38px;
-}
-
-.fullpage-view #json-input {
-  flex-basis: 210px;
-}
-
-.fullpage-view .output-box {
-  min-height: 200px;
-}
-
-.fullpage-view .encoder-container {
-  min-height: 330px;
-}
-
-.fullpage-view .color-tool-layout {
-  min-height: 440px;
-}
-
-.fullpage-view .color-preview {
-  min-height: 260px;
-}
-
-@media (max-width: 760px) {
-  body.fullpage-view {
-    min-height: 100dvh;
-    padding: 0;
-  }
-
-  .fullpage-view .container {
-    width: 100%;
-    height: 100dvh;
-    min-height: 100dvh;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .fullpage-view .container::before {
-    border-radius: 0;
-  }
-
-  .fullpage-view .tools-nav {
-    width: 76px;
-    min-width: 76px;
-    padding: 14px 9px;
-  }
-
-  .fullpage-view .tool-content {
-    padding: 20px 16px 26px;
-  }
+@media (max-width: 650px) {
+  .fullpage-view .sidebar { position: absolute; inset: 0 auto 0 0; z-index: 50; width: 166px; box-shadow: 4px 0 0 var(--shadow); }
+  .fullpage-view.sidebar-collapsed .sidebar { width: 68px; box-shadow: none; }
+  .fullpage-view .main-shell { margin-left: 68px; }
 }
