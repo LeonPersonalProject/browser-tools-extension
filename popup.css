@@ -1,4 +1,5 @@
 :root {
+  --editor-size: 14px; --input-ratio: 50%;
   color-scheme: light;
   --bg: #fff1f5; --paper: #fffdfd; --text: #493346; --muted: #80657a;
   --line: #e9d2dd; --code: #fff8fb; --pink: #ffb4ce; --mint: #b9ebd9;
@@ -286,6 +287,26 @@ h2 { font-size: 18px; letter-spacing: -.03em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .sparkle { display: none; }
+}
+/* Quiet work surfaces; retain the candy identity in navigation. */
+.paper, [data-theme=dark] .paper, .number-strip, input, .select-trigger { box-shadow: none; }
+.color-card, .paper-tab, .mood-sticker { transform: none; }
+.paper-tab, .mood-sticker, .paper, .number-strip, dialog { border-radius: var(--radius); }
+.mood-sticker::before { display: none; }
+.number-strip:nth-child(2n) { margin-left: 0; }
+.encoded-paper, .password-result { margin-top: 0; }
+.code-input, .code-output, .code-output.empty { font-size: var(--editor-size); }
+.error { white-space: pre-wrap; }
+.two-columns { grid-template-columns: minmax(0, var(--input-ratio)) minmax(0, 1fr); }
+[data-workspace=input] .json-workspace > .result-paper, [data-workspace=input] .encode-workspace > .encoded-paper,
+[data-workspace=result] .json-workspace > .source-column, [data-workspace=result] .encode-workspace > .source-paper { display: none; }
+[data-workspace=input] .json-workspace, [data-workspace=result] .json-workspace,
+[data-workspace=input] .encode-workspace, [data-workspace=result] .encode-workspace { grid-template-columns: 1fr; }
+.nav-overlay { position: fixed; inset: 0 0 0 166px; z-index: 45; background: var(--shadow); opacity: .8; border: 0; }
+@media (max-width: 650px) {
+  .fullpage-view .sidebar { position: absolute; inset: 0 auto 0 0; z-index: 50; width: 166px; }
+  .fullpage-view.sidebar-collapsed .sidebar { width: 68px; }
+  .fullpage-view .main-shell { margin-left: 68px; }
 }
 @media (max-width: 700px) {
   .mood-sticker { display: none; }

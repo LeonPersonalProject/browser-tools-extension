@@ -45,6 +45,61 @@
   }
   const jsonFormatter = {
     preprocessJson: pythonToJson,
+    mountTree(container, data, copy) {
+      container.replaceChildren();
+      const node = (value, path, key, depth) => {
+        const row = document.createElement('div');
+        row.className = 'tree-row';
+        const label = document.createElement('button');
+        label.type = 'button'; label.className = 'text-button';
+        label.textContent = key + ' ⧉'; label.title = '复制 JSON Pointer：' + (path || '（根路径为空）');
+        label.addEventListener('click', () => copy(path || ''));
+        row.append(label);
+        if (value === null || typeof value !== 'object') {
+          const text = document.createElement('span'); text.textContent = ': ' + JSON.stringify(value); row.append(text);
+          return row;
+        }
+        const detail = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = (Array.isArray(value) ? '数组' : '对象') + ' · ' + Object.keys(value).length + ' 项';
+        detail.append(summary);
+        let loaded = false;
+        detail.addEventListener('toggle', () => { if (detail.open) detail.loadChildren(); });
+        detail.loadChildren = () => {
+          if (loaded) return;
+          loaded = true;
+          if (depth >= 60) { const note = document.createElement('span'); note.textContent = '深度超过 60，请使用代码视图'; detail.append(note); return; }
+          const keys = Object.keys(value);
+          let offset = 0;
+          const more = document.createElement('button'); more.type = 'button'; more.className = 'text-button';
+          more.textContent = '加载后续 100 项';
+          const batch = () => {
+            const end = Math.min(offset + 100, keys.length);
+            while (offset < end) {
+              const childKey = keys[offset++];
+              const pointer = path + '/' + childKey.replace(/~/g, '~0').replace(/\//g, '~1');
+              detail.append(node(value[childKey], pointer, childKey, depth + 1));
+            }
+            if (offset < keys.length) detail.append(more); else more.remove();
+          };
+          more.addEventListener('click', batch); batch();
+        };
+        row.append(detail); return row;
+      };
+      container.append(node(data, '', '$', 0));
+      container.querySelector('details')?.setAttribute('open', '');
+    },
+    toggleTree(container, open) {
+      let processed = 0;
+      if (!open) { container.querySelectorAll('details').forEach(detail => { detail.open = false; }); return true; }
+      const queue = [...container.querySelectorAll('details')];
+      while (queue.length && processed < 2000) {
+        const detail = queue.shift();
+        detail.open = true; detail.loadChildren?.(); processed++;
+        queue.push(...[...detail.children].flatMap(child => child.classList.contains('tree-row') ? [...child.children].filter(el => el.tagName === 'DETAILS') : []));
+      }
+      return !queue.length && ![...container.querySelectorAll('button')].some(button => button.textContent === '加载后续 100 项');
+    },
     parse(text) {
       try { return JSON.parse(text); }
       catch (original) {
@@ -54,17 +109,23 @@
     },
     format(text, indent = 2, sort = false) {
       try {
+        if (new Blob([text]).size > 5 * 1024 * 1024) throw new Error('输入上限为 5 MiB。');
         let parsed = this.parse(text);
         if (sort) parsed = sortKeys(parsed);
         return { success: true, parsed, result: JSON.stringify(parsed, null, indent) };
       } catch (e) {
+        if (!(e instanceof SyntaxError)) return { success: false, error: e.message };
         const position = e.message.match(/position (\d+)/i);
-        let location = '';
-        if (position) {
-          const prefix = text.slice(0, Number(position[1]));
-          location = '（第 ' + prefix.split('\n').length + ' 行，第 ' + (prefix.length - prefix.lastIndexOf('\n')) + ' 列）';
-        }
-        return { success: false, error: e.message + location };
+        const lineMatch = e.message.match(/line (\d+) column (\d+)/i);
+        const reported = !!(position || lineMatch);
+        let index = position ? Number(position[1]) : text.length;
+        if (!position && lineMatch) index = text.split('\n').slice(0, Number(lineMatch[1]) - 1).reduce((sum, line) => sum + line.length + 1, 0) + Number(lineMatch[2]) - 1;
+        index = Math.max(0, Math.min(index, text.length));
+        const prefix = text.slice(0, index);
+        const line = prefix.split('\n').length;
+        const column = prefix.length - prefix.lastIndexOf('\n');
+        const location = '（第 ' + line + ' 行，第 ' + column + ' 列' + (reported ? '；解析器报告位置' : '；输入末尾参考位置，解析器未提供准确位置') + '）';
+        return { success: false, line, column, position: index, locationExact: reported, error: e.message + location + '\n附近：' + text.slice(Math.max(0, index - 60), index) + ' ⟵ ' + text.slice(index, index + 60) };
       }
     },
     compress(text, sort = false) { return this.format(text, 0, sort); },
@@ -90,6 +151,15 @@
       if (!entries.length) return array ? '[]' : '{}';
       return '<details' + (level < 2 ? ' open' : '') + '><summary>' + (array ? '[' : '{') + '<span class="json-count">' + entries.length + (array ? ' 项' : ' 个键') + '</span></summary>' + entries.map(([key, value]) => '<div class="tree-row"><span class="json-key">' + this.escapeHtml(array ? key : JSON.stringify(key)) + '</span>: ' + this.renderCollapsible(value, level + 1) + '</div>').join('') + (array ? ']' : '}') + '</details>';
     },
+    preview(value) {
+      if (value !== null && typeof value === 'object') return (Array.isArray(value) ? '数组' : '对象') + ' · ' + Object.keys(value).length + ' 项（使用路径或树查看内容）';
+      return JSON.stringify(typeof value === 'string' ? value.slice(0, 1000) : value);
+    },
+    searchText(data, query) {
+      if (!query.trim()) return '输入键名、点路径或 JSON Pointer 开始查找。';
+      const matches = this.search(data, query);
+      return (matches.length ? matches.map(match => match.path + '\n' + this.preview(match.value)).join('\n\n') : '没有找到匹配的键或路径。') + '\n最多展示 100 条；最多扫描 100000 个键或数组项；长字符串仅预览前 1000 字符。';
+    },
     search(data, query) {
       query = query.trim();
       if (!query) return [];
@@ -108,14 +178,18 @@
         return [{ path: query, value }];
       }
       const matches = [];
+      let visited = 0;
       const stack = [{ value: data, path: '' }];
-      while (stack.length && matches.length < 100) {
+      while (stack.length && matches.length < 100 && visited < 100000) {
         const { value, path } = stack.pop();
         if (value === null || typeof value !== 'object') continue;
-        for (const [key, child] of Object.entries(value)) {
+        for (const key in value) {
+          if (!Object.hasOwn(value, key)) continue;
+          if (visited++ >= 100000) break;
+          const child = value[key];
           const childPath = path + '/' + key.replace(/~/g, '~0').replace(/\//g, '~1');
           if (key.toLocaleLowerCase().includes(query.toLocaleLowerCase())) matches.push({ path: childPath, value: child });
-          stack.push({ value: child, path: childPath });
+          if (child !== null && typeof child === 'object') stack.push({ value: child, path: childPath });
           if (matches.length >= 100) break;
         }
       }

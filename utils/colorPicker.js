@@ -30,7 +30,14 @@ export const colorPicker = {
     } else {
       const match = text.match(/^(rgba?|hsla?)\((.*)\)$/);
       if (!match) throw new Error('请输入 HEX、RGB(A) 或 HSL(A) 颜色。');
-      const parts = match[2].trim().split(/\s*[,/]\s*|\s+/).filter(Boolean);
+      const body = match[2].trim();
+      const comma = body.includes(',');
+      if (comma && body.includes('/')) throw new Error('不能混用逗号和斜线分隔。');
+      const parts = comma ? body.split(',').map(part => part.trim()) : body.replace(/\s*\/\s*/, ' / ').split(/\s+/);
+      if (!comma && parts.includes('/')) {
+        if (parts.length !== 5 || parts[3] !== '/') throw new Error('不透明度前需要一个斜线。');
+        parts.splice(3, 1);
+      } else if (!comma && parts.length !== 3) throw new Error('空格语法的不透明度需要斜线。');
       if (parts.length < 3 || parts.length > 4 || parts.some(part => !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:%|deg|rad|turn)?$/.test(part))) throw new Error('颜色格式无效，请检查通道数值。');
       if (parts[3] && !/^[\d.]+%?$/.test(parts[3])) throw new Error('不透明度应为 0–1 或百分比。');
       a = alpha(parts[3]);
@@ -38,7 +45,7 @@ export const colorPicker = {
         if (parts.slice(0, 3).some(part => !/^[+-]?[\d.]+%?$/.test(part))) throw new Error('RGB 通道应为数字或百分比。');
         channels = parts.slice(0, 3).map(channel);
       } else {
-        if (!parts[1].endsWith('%') || !parts[2].endsWith('%')) throw new Error('HSL 的饱和度和亮度需要百分比。');
+        if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)%$/.test(parts[1]) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)%$/.test(parts[2])) throw new Error('HSL 的饱和度和亮度需要百分比。');
         const saturation = parseFloat(parts[1]), lightness = parseFloat(parts[2]);
         let hue = parseFloat(parts[0]);
         if (parts[0].endsWith('%')) throw new Error('色相不能使用百分比。');

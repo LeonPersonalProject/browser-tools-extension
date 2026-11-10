@@ -12,6 +12,9 @@
 .modal-workspace { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 24px; }
 .modal-workspace .code-input, .modal-workspace .code-output { height: max(200px, calc(90vh - 310px)); min-height: 150px; font-size: 13px; }
 .modal-workspace .code-input { resize: vertical; }
+.modal-source-actions { padding: 0 14px 14px; }
+.modal-workspace .code-input, .modal-workspace .code-output { font-size: var(--editor-size, 14px); }
+.modal-body .search-row { margin-top: 12px; }
 .modal-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 10px; color: var(--muted); }
 .modal-footer .actions { margin-top: 0; }
 .modal-status { color: var(--string); min-height: 17px; margin: 10px 0; font-size: 11px; }

@@ -15,7 +15,9 @@ export const passwordGenerator = {
     if (!Number.isInteger(length) || length < minLength || length > maxLength) {
       return { success: false, error: '密码长度需要是 ' + minLength + '–' + maxLength + ' 之间的整数。' };
     }
-    const groups = Object.entries(characterSets).filter(([type]) => options[type]).map(([, characters]) => characters);
+    const excluded = new Set([...(options.exclude || ''), ...(options.avoidAmbiguous ? 'Il1O0o|' : '')]);
+    const groups = Object.entries(characterSets).filter(([type]) => options[type]).map(([, characters]) => [...characters].filter(character => !excluded.has(character)).join(''));
+    if (groups.some(group => !group.length)) return { success: false, error: '排除字符后，所选类型没有可用字符。' };
     if (!groups.length) return { success: false, error: '请至少选择一种字符类型。' };
     if (!globalThis.crypto?.getRandomValues) return { success: false, error: '当前环境无法使用安全随机源，请在支持的浏览器中打开扩展。' };
     const pool = groups.join('');

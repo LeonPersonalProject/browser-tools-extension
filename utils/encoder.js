@@ -20,6 +20,8 @@ function decode64(text, url = false) {
 export const encoder = {
   base64Encode: text => safe(() => encode64(text)),
   base64Decode: text => safe(() => decode64(text)),
+  urlFullEncode: text => safe(() => encodeURI(text)),
+  urlFullDecode: text => safe(() => decodeURI(text)),
   urlEncode: text => safe(() => encodeURIComponent(text)),
   urlDecode: text => safe(() => decodeURIComponent(text)),
   htmlEncode: text => safe(() => text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char])),

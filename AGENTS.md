@@ -16,11 +16,11 @@ Use `git diff --check` before submitting to catch whitespace errors. Validate `m
 
 ## Coding Style & Naming Conventions
 
-Use modern, framework-free JavaScript with ES module imports/exports. Match the existing two-space indentation, semicolons, single-quoted JavaScript strings, and trailing commas only where already used. Prefer `const`, use `let` only for reassignment, and keep DOM setup grouped in focused `init*` functions. Name variables and functions in `camelCase`, utility files in `camelCase.js`, and HTML IDs/CSS classes in `kebab-case`. Reuse CSS custom properties and shared `glass-*` classes before adding one-off values.
+Use modern, framework-free JavaScript with ES module imports/exports. Match the existing two-space indentation, semicolons, single-quoted JavaScript strings, and trailing commas only where already used. Prefer `const`, use `let` only for reassignment, and keep DOM setup grouped in focused `init*` functions. Name variables and functions in `camelCase`, utility files in `camelCase.js`, and HTML IDs/CSS classes in `kebab-case`. Reuse CSS custom properties and shared `paper`, `field`, and button classes before adding one-off values.
 
 ## Testing Guidelines
 
-No automated test suite or coverage threshold currently exists. Manually smoke-test both `popup.html` and `fullpage.html` in a supported browser. Exercise every affected tool, light/dark themes, clipboard actions, error states, navigation, and the injected JSON modal. Check the browser console for errors. For permission or manifest changes, reinstall the unpacked extension and verify the full flow.
+Run `node tests.mjs` for algorithm boundary tests (Node 22+). No build or package install is required. JSON parsing/sorting uses a module Worker, with a shared 5 MiB input limit and lazy tree rendering. Independent-page state moves through a memory-only background handoff, consumed once within 30 seconds; never store passwords, JWTs or drafts. The webpage modal is not a secure extension page: the host page may read its DOM. Manually smoke-test both `popup.html` and `fullpage.html` in a supported browser. Exercise every affected tool, light/dark themes, clipboard actions, error states, navigation, and the injected JSON modal. Check the browser console for errors. For permission or manifest changes, reinstall the unpacked extension and verify the full flow.
 
 ## Commit & Pull Request Guidelines
 

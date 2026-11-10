@@ -49,7 +49,7 @@ function feedback(message, failure = false, announce = true) {
   }
 }
 async function copyText(text) {
-  if (!text || text === '—') { feedback('还没有可复制的结果', true); return; }
+  if (text === undefined || text === null || text === '—') { feedback('还没有可复制的结果', true); return; }
   try {
     try { await navigator.clipboard.writeText(text); }
     catch {
@@ -108,10 +108,16 @@ function initShell() {
   applyMotion();
   $('motion-btn').addEventListener('click', () => { motion = !motion; applyMotion(); });
   $('motion-toggle').addEventListener('change', () => { motion = $('motion-toggle').checked; applyMotion(); });
-  let collapsed = pref.get('candy-sidebar', innerWidth < 650 ? 'collapsed' : 'expanded') === 'collapsed';
+  const isDrawer = () => document.body.classList.contains('fullpage-view') && innerWidth <= 650;
+  let collapsed = pref.get('candy-sidebar', isDrawer() ? 'collapsed' : 'expanded') === 'collapsed';
   const applySidebar = () => {
     closeSelects?.();
     document.body.classList.toggle('sidebar-collapsed', collapsed);
+    $('nav-overlay').hidden = collapsed || !isDrawer();
+    if (isDrawer()) {
+      document.querySelector('.main-shell').inert = !collapsed;
+      if (!collapsed) $('nav-toggle').focus();
+    }
     $('nav-toggle').setAttribute('aria-expanded', String(!collapsed));
     $('nav-toggle').setAttribute('aria-label', collapsed ? '展开侧边栏' : '收起侧边栏');
     $('nav-toggle').title = collapsed ? '展开侧边栏' : '收起侧边栏';
@@ -122,6 +128,19 @@ function initShell() {
     pref.set('candy-sidebar', collapsed ? 'collapsed' : 'expanded');
     applySidebar();
   });
+  $('nav-overlay').addEventListener('click', () => { collapsed = true; applySidebar(); $('nav-toggle').focus(); });
+  window.addEventListener('resize', () => { document.querySelector('.main-shell').inert = false; applySidebar(); });
+  document.addEventListener('keydown', event => {
+    if (!isDrawer() || collapsed) return;
+    if (event.key === 'Escape') { collapsed = true; applySidebar(); $('nav-toggle').focus(); }
+    if (event.key === 'Tab') {
+      const buttons = [...document.querySelector('.sidebar').querySelectorAll('a, button')];
+      const first = buttons[0], last = buttons.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  });
+  document.querySelectorAll('[data-tool]').forEach(item => item.addEventListener('click', () => { if (isDrawer()) { collapsed = true; applySidebar(); $('nav-toggle').focus(); } }));
   const dialog = $('settings-panel');
   $('settings-btn').addEventListener('click', () => { closeSelects(); dialog.showModal(); });
   $('close-settings').addEventListener('click', () => dialog.close());
@@ -130,11 +149,33 @@ function initShell() {
     const rect = dialog.getBoundingClientRect();
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   } });
-  $('fullscreen-btn').addEventListener('click', () => {
+  $('fullscreen-btn').title = $('fullscreen-btn').ariaLabel = '独立页继续编辑（一次性传递，不保存草稿）';
+  $('fullscreen-btn').addEventListener('click', async () => {
+    const state = {
+      tool: currentTool,
+      fields: [...document.querySelectorAll('.page input:not([type=file]), .page textarea, .page select')].map(el => ({ id: el.id, value: el.value, checked: el.checked })),
+      outputs: [...document.querySelectorAll('.page output')].map(el => ({ id: el.id, text: el.textContent })),
+      jsonResult: $('json-output').dataset.formatted || '',
+      tree: $('json-tree-view').getAttribute('aria-pressed') === 'true'
+    };
     const url = new URL('fullpage.html', location.href);
-    url.hash = currentTool;
-    if (globalThis.chrome?.tabs?.create) chrome.tabs.create({ url: url.href }); else window.open(url.href, '_blank', 'noopener');
+    if (globalThis.chrome?.tabs?.create) {
+      const response = await chrome.runtime.sendMessage({ type: 'candy-open', state });
+      feedback(response?.success ? '已打开独立页并传递临时状态' : '独立页打开失败', !response?.success);
+    } else {
+      const child = window.open(url.href, '_blank');
+      const receive = event => {
+        if (event.source !== child || event.origin !== location.origin || event.data !== 'candy-ready') return;
+        child.postMessage({ type: 'candy-transfer', state }, location.origin);
+        window.removeEventListener('message', receive);
+      };
+      window.addEventListener('message', receive);
+      setTimeout(() => window.removeEventListener('message', receive), 30000);
+    }
   });
+  $('editor-size').addEventListener('input', () => root.style.setProperty('--editor-size', Math.max(12, Math.min(24, Number($('editor-size').value) || 14)) + 'px'));
+  $('workspace-mode').addEventListener('change', () => root.dataset.workspace = $('workspace-mode').value);
+  $('column-ratio').addEventListener('input', () => root.style.setProperty('--input-ratio', $('column-ratio').value + '%'));
   document.querySelectorAll('[data-tool]').forEach(item => item.addEventListener('click', () => showTool(item.dataset.tool)));
   document.querySelector('.brand').addEventListener('click', event => { event.preventDefault(); showTool('json'); });
   window.addEventListener('hashchange', () => { if (tools[location.hash.slice(1)]) showTool(location.hash.slice(1)); });
@@ -172,6 +213,7 @@ function initJson() {
   const input = $('json-input');
   const clearResult = () => {
     formatted = ''; parsed = undefined;
+    delete $('json-output').dataset.formatted;
     $('json-output').textContent = '整理好的 JSON 会出现在这里';
     $('json-output').classList.add('empty');
     $('json-status').textContent = '等待输入';
@@ -182,7 +224,9 @@ function initJson() {
   };
   const render = () => {
     $('json-output').classList.remove('empty');
-    $('json-output').innerHTML = tree ? jsonFormatter.renderCollapsible(parsed) : jsonFormatter.syntaxHighlight(formatted);
+    if (tree) jsonFormatter.mountTree($('json-output'), parsed, copyText);
+    else if (formatted.length > 200000) $('json-output').textContent = formatted;
+    else $('json-output').innerHTML = jsonFormatter.syntaxHighlight(formatted);
     $('json-code-view').setAttribute('aria-pressed', String(!tree));
     $('json-tree-view').setAttribute('aria-pressed', String(tree));
     $('json-lines').textContent = formatted.split('\n').length + ' 行';
@@ -190,33 +234,59 @@ function initJson() {
     $('json-copy').disabled = false;
     $('json-export').disabled = false;
   };
-  const run = (compress = false, announce = true) => {
+  let worker;
+  let revision = 0;
+  const run = async (compress = false, announce = true) => {
+    revision++; worker?.terminate();
     clearResult();
     $('json-error').textContent = '';
     if (!input.value.trim()) {
       $('json-error').textContent = '先粘贴一些 JSON，或点“试个例子”。';
       input.setAttribute('aria-invalid', 'true');
+      $('json-status').textContent = '未处理：输入为空';
       return false;
     }
     const indent = $('json-indent').value === 'tab' ? '\t' : Number($('json-indent').value);
-    const result = jsonFormatter.format(input.value, compress ? 0 : indent, $('json-sort').checked);
+    if (new Blob([input.value]).size > 5 * 1024 * 1024) { $('json-error').textContent = '输入上限为 5 MiB。'; $('json-status').textContent = '未处理：超过规模上限'; return false; }
+    worker?.terminate();
+    const token = ++revision;
+    $('json-status').textContent = '正在解析与整理…';
+    const result = await new Promise(resolve => {
+      try {
+        const task = new Worker(new URL('./utils/jsonWorker.js', import.meta.url), { type: 'module' });
+        worker = task;
+        task.onmessage = event => { task.terminate(); resolve(event.data); };
+        task.onerror = () => { task.terminate(); resolve({ success: false, error: '后台处理失败，请重新打开独立页后重试。' }); };
+        task.postMessage({ text: input.value, indent: compress ? 0 : indent, sort: $('json-sort').checked });
+      } catch { resolve({ success: false, error: '无法启动后台处理，请重新打开独立页后重试。' }); }
+    });
+    if (token !== revision) return false;
     input.setAttribute('aria-invalid', String(!result.success));
     if (!result.success) {
       $('json-error').textContent = result.error;
+      $('json-status').textContent = '校验失败';
       feedback('请检查 JSON 格式', true, false);
       return false;
     }
     formatted = result.result; parsed = result.parsed;
+    $('json-output').dataset.formatted = formatted;
     render();
-    if (announce) feedback(compress ? '已压缩 JSON' : '整理好啦');
+    $('json-status').textContent = compress ? '已压缩 · 校验通过' : '已格式化 · 校验通过';
+    if (announce) feedback(compress ? '已压缩 JSON' : '已格式化 JSON');
     return true;
   };
   const changed = () => {
+    revision++;
+    worker?.terminate();
     $('json-input-count').textContent = input.value.length.toLocaleString() + ' 字符';
     $('json-error').textContent = '';
     input.removeAttribute('aria-invalid');
     clearResult();
   };
+  input.addEventListener('paste', event => {
+    const next = input.value.slice(0, input.selectionStart) + event.clipboardData.getData('text') + input.value.slice(input.selectionEnd);
+    if (new Blob([next]).size > 5 * 1024 * 1024) { event.preventDefault(); feedback('粘贴后超过 5 MiB 上限', true); }
+  });
   input.addEventListener('input', changed);
   input.addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); run(); }
@@ -231,24 +301,44 @@ function initJson() {
     changed(); run();
   });
   $('json-copy').addEventListener('click', () => copyText(formatted));
+  [['json-expand', true], ['json-collapse', false]].forEach(([id, open]) => $(id).addEventListener('click', () => {
+    if (!formatted) { feedback('请先格式化 JSON', true); return; }
+    tree = true; render();
+    const complete = jsonFormatter.toggleTree($('json-output'), open);
+    feedback(complete ? (open ? '已全部展开' : '已全部收起') : '部分展开完成（最多 2000 个容器，每层首批 100 项）；其余请逐层加载');
+  }));
   $('json-code-view').addEventListener('click', () => { tree = false; if (formatted) render(); else $('json-code-view').setAttribute('aria-pressed', 'true'); $('json-tree-view').setAttribute('aria-pressed', 'false'); });
   $('json-tree-view').addEventListener('click', () => { tree = true; $('json-tree-view').setAttribute('aria-pressed', 'true'); $('json-code-view').setAttribute('aria-pressed', 'false'); if (formatted) render(); });
-  const search = () => {
-    if (!formatted && !run(false, false)) return;
+  const search = async () => {
     const query = $('json-search').value.trim();
-    const matches = jsonFormatter.search(parsed, query);
+    if (!query) { $('json-search-result').hidden = false; $('json-search-result').textContent = jsonFormatter.searchText(null, ''); return; }
+    if (!formatted && !await run(false, false)) return;
     $('json-search-result').hidden = false;
-    $('json-search-result').textContent = !query ? '输入键名、点路径或 JSON Pointer 开始查找。' : matches.length ? matches.map(match => match.path + '\n' + JSON.stringify(match.value, null, 2)).join('\n\n') + (matches.length === 100 ? '\n最多展示 100 条匹配。' : '') : '没有找到匹配的键或路径。';
+    $('json-search-result').textContent = jsonFormatter.searchText(parsed, query);
   };
   $('json-search-btn').addEventListener('click', search);
   $('json-search').addEventListener('keydown', event => { if (event.key === 'Enter') search(); });
-  $('json-export').addEventListener('click', () => { if (formatted || run(false, false)) download(formatted, 'formatted.json'); });
+  $('json-export').addEventListener('click', async () => { if (formatted || await run(false, false)) { download(formatted, 'formatted.json'); feedback('已发起下载 formatted.json'); } });
+  let importRevision = 0;
   const readFile = async file => {
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { $('json-error').textContent = '导入失败：请选择 5 MiB 以内的文件。'; return; }
+    changed();
+    const token = ++importRevision;
+    const inputRevision = revision;
+    $('json-status').textContent = '正在读取文件…';
     try {
-      if (file.size > 5 * 1024 * 1024) throw new Error('请选择 5 MB 以内的文件。');
-      input.value = await file.text(); changed(); run();
-    } catch (error) { $('json-error').textContent = '导入失败：' + error.message; }
+      const text = await file.text();
+      if (token !== importRevision || inputRevision !== revision) return;
+      if (new Blob([text]).size > 5 * 1024 * 1024) throw new Error('解码后的文本超过 5 MiB。');
+      input.value = text; changed();
+      $('json-status').textContent = '文件已导入，等待格式化';
+      feedback('文件已导入，点击格式化处理');
+    } catch (error) {
+      if (token !== importRevision || inputRevision !== revision) return;
+      $('json-error').textContent = '导入失败：' + error.message;
+      $('json-status').textContent = '文件读取失败';
+    }
   };
   $('json-import').addEventListener('click', () => $('json-file').click());
   $('json-file').addEventListener('change', async () => { await readFile($('json-file').files[0]); $('json-file').value = ''; });
@@ -263,19 +353,29 @@ function initJson() {
       if (!tab?.id || !/^https?:\/\//.test(tab.url || '')) throw new Error('此页面不支持注入，请切换到普通网页。');
       const styles = await fetch(chrome.runtime.getURL('popup.css')).then(response => response.text());
       const modalStyles = await fetch(chrome.runtime.getURL('json-modal-inject.css')).then(response => response.text());
+      const workerSource = await fetch(chrome.runtime.getURL('utils/jsonCore.js')).then(response => response.text());
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['utils/jsonCore.js'] });
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: data => { globalThis.__candyModalData = data; }, args: [{ input: input.value, theme: root.dataset.theme, motion: root.dataset.motion, styles, modalStyles }] });
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: data => { globalThis.__candyModalData = data; }, args: [{ input: input.value, indent: $('json-indent').value, sort: $('json-sort').checked, tree, theme: root.dataset.theme, motion: root.dataset.motion, styles, modalStyles, workerSource }] });
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['json-modal-inject.js'] });
-      feedback('已在当前网页打开 JSON 大窗口');
+      feedback('已在当前网页打开 JSON 窗口');
     } catch (error) { feedback(error.message || '大窗口打开失败', true); }
   });
+  input.addEventListener('candy-restore-result', event => {
+    const result = jsonFormatter.format(event.detail);
+    if (!result.success) return;
+    formatted = event.detail; parsed = result.parsed;
+    $('json-output').dataset.formatted = formatted;
+    render();
+  });
+  $('json-copy').parentElement.append($('json-export'));
   clearResult();
 }
 
 function initTimestamp() {
   let last = null;
   let source = 'timestamp';
-  const zone = () => $('timestamp-zone').value;
+  const zone = () => $('timestamp-custom-zone').value.trim() || $('timestamp-zone').value;
+  $('timestamp-custom-zone').addEventListener('input', () => { convert(); $('time-diff-result').textContent = ''; });
   const clear = () => {
     last = null;
     ['local-time', 'utc-time', 'timestamp-iso', 'timestamp-sec', 'timestamp-ms'].forEach(id => { $(id).textContent = '—'; });
@@ -306,7 +406,7 @@ function initTimestamp() {
   $('timestamp-zone').addEventListener('change', () => { convert(); $('time-diff-result').textContent = ''; });
   $('timestamp-now').addEventListener('click', () => {
     $('timestamp-input').value = $('timestamp-unit').value === 's' ? timestamp.getCurrentTimestamp().timestampSec : Date.now();
-    source = 'timestamp'; convert(); feedback('此刻已捕获');
+    source = 'timestamp'; convert(); feedback(last ? '已转换当前时间' : '当前时间转换失败，请检查时区', !last);
   });
   $('time-diff').addEventListener('click', () => {
     const start = timestamp.dateToTimestamp($('time-start').value, zone());
@@ -451,7 +551,7 @@ function initConverter() {
   const ids = ['binary', 'octal', 'decimal', 'hexadecimal'];
   const run = () => {
     const text = $('converter-input').value;
-    const result = converter.convertToAll(text, $('converter-from-base').value, $('converter-prefix').checked, $('converter-uppercase').checked);
+    const result = converter.convertToAll(text, $('converter-from-base').value, $('converter-prefix').checked, $('converter-uppercase').checked, $('converter-group').checked);
     $('converter-error').textContent = text.trim() && !result.success ? result.error : '';
     $('converter-input').setAttribute('aria-invalid', String(Boolean(text.trim() && !result.success)));
     ids.forEach(id => { $('converter-' + id).textContent = result.success ? result.results[id] : '—'; });
@@ -459,7 +559,7 @@ function initConverter() {
   };
   $('converter-input').addEventListener('input', run);
   $('converter-input').addEventListener('keydown', event => { if (event.key === 'Enter') run(); });
-  ['converter-from-base', 'converter-prefix', 'converter-uppercase'].forEach(id => $(id).addEventListener('change', run));
+  ['converter-from-base', 'converter-prefix', 'converter-uppercase', 'converter-group'].forEach(id => $(id).addEventListener('change', run));
   $('converter-convert').addEventListener('click', () => { const success = run(); feedback(success ? '每一位，都转换好了' : '请输入有效整数', !success); });
   $('converter-clear').addEventListener('click', () => { $('converter-input').value = ''; run(); $('converter-input').focus(); });
 }
@@ -495,6 +595,7 @@ function initPasswordGenerator() {
   });
   range.addEventListener('input', () => { input.value = range.value; changed(); });
   types.forEach(type => $('password-' + type).addEventListener('change', changed));
+  ['password-ambiguous', 'password-exclude', 'password-batch'].forEach(id => $(id).addEventListener('input', changed));
   $('password-form').addEventListener('submit', event => {
     event.preventDefault();
     clearResult();
@@ -503,7 +604,12 @@ function initPasswordGenerator() {
       return;
     }
     const options = Object.fromEntries(types.map(type => [type, $('password-' + type).checked]));
-    const result = passwordGenerator.generate(input.valueAsNumber, options);
+    options.exclude = $('password-exclude').value;
+    options.avoidAmbiguous = $('password-ambiguous').checked;
+    const count = Number($('password-batch').value);
+    if (!Number.isInteger(count) || count < 1 || count > 100) { $('password-error').textContent = '生成数量必须是 1–100 的整数。'; return; }
+    const results = Array.from({ length: count }, () => passwordGenerator.generate(input.valueAsNumber, options));
+    const result = results.find(item => !item.success) || { success: true, result: results.map(item => item.result).join('\n') };
     if (!result.success) {
       $('password-error').textContent = result.error;
       feedback('密码生成失败，请重试', true, false);
@@ -513,7 +619,7 @@ function initPasswordGenerator() {
     output.classList.remove('empty');
     $('password-count').textContent = result.result.length + ' 字符';
     $('password-copy').disabled = false;
-    $('password-status').textContent = '已生成 ' + result.result.length + ' 位密码';
+    $('password-status').textContent = '已生成 ' + count + ' 个 ' + input.valueAsNumber + ' 位密码';
     $('password-generate').textContent = '↻ 重新生成';
     feedback('新密码准备好了');
   });
@@ -523,3 +629,37 @@ initShell();
 closeSelects = initSelects();
 initJson(); initTimestamp(); initEncoder(); initColors(); initConverter(); initPasswordGenerator();
 showTool(location.hash.slice(1) || pref.get('candy-tool', 'json'));
+async function restoreTransfer(state) {
+  if (!state) return;
+  state.fields.forEach(saved => {
+    const el = $(saved.id); if (!el) return;
+    el.value = saved.value; if (el.type === 'checkbox') el.checked = saved.checked;
+  });
+  state.fields.forEach(saved => {
+    const el = $(saved.id); if (!el) return;
+    el.dispatchEvent(new Event(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', { bubbles: true }));
+  });
+  // Restore input again after listeners that normalize values or invalidate outputs.
+  state.fields.forEach(saved => { if ($(saved.id)) $(saved.id).value = saved.value; });
+  state.outputs.forEach(saved => { if ($(saved.id)) $(saved.id).textContent = saved.text; });
+  $('encode-copy').disabled = !$('encode-output').value;
+  $('encode-swap').disabled = !$('encode-output').value;
+  $('password-copy').disabled = !state.outputs.find(saved => saved.id === 'password-output' && !saved.text.startsWith('点击生成'));
+  if (!$('password-copy').disabled) $('password-output').classList.remove('empty');
+  showTool(state.tool);
+  if (state.tree) $('json-tree-view').click();
+  if (state.jsonResult) $('json-input').dispatchEvent(new CustomEvent('candy-restore-result', { detail: state.jsonResult }));
+  feedback('已接收一次性编辑状态，不保存草稿');
+}
+if (document.body.classList.contains('fullpage-view')) {
+  if (globalThis.chrome?.runtime?.sendMessage) chrome.runtime.sendMessage({ type: 'candy-transfer' }).then(restoreTransfer).catch(() => {});
+  else if (window.opener) {
+    const opener = window.opener;
+    const receive = event => {
+      if (event.origin !== location.origin || event.source !== opener || event.data?.type !== 'candy-transfer') return;
+      window.removeEventListener('message', receive); window.opener = null; restoreTransfer(event.data.state);
+    };
+    window.addEventListener('message', receive); opener.postMessage('candy-ready', location.origin);
+    setTimeout(() => { window.removeEventListener('message', receive); window.opener = null; }, 30000);
+  }
+}

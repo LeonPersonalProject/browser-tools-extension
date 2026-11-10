@@ -14,13 +14,17 @@ export const converter = {
     } catch { return { success: false, error: '数值无法解析，请检查长度与进制。' }; }
   },
   isValidNumber(value, base) { return this.toDecimal(value, base).success; },
-  fromDecimal(value, base, prefix = false, uppercase = true) {
+  fromDecimal(value, base, prefix = false, uppercase = true, group = false) {
     try {
       if (typeof value === 'number' && !Number.isSafeInteger(value)) throw new Error();
       const num = BigInt(value);
       if (!Object.hasOwn(prefixes, base)) throw new Error();
       let text = (num < 0n ? -num : num).toString(Number(base));
       if (uppercase && Number(base) === 16) text = text.toUpperCase();
+      if (group) {
+        const size = Number(base) === 2 || Number(base) === 16 ? 4 : 3;
+        text = text.replace(new RegExp('\\B(?=(?:.{'+ size + '})+$)', 'g'), ' ');
+      }
       return { success: true, result: (num < 0n ? '-' : '') + (prefix ? prefixes[base] : '') + text };
     } catch { return { success: false, error: '无效的整数或进制' }; }
   },
@@ -28,9 +32,9 @@ export const converter = {
     const parsed = this.toDecimal(value, from);
     return parsed.success ? this.fromDecimal(parsed.result, to) : parsed;
   },
-  convertToAll(value, base, prefix = false, uppercase = true) {
+  convertToAll(value, base, prefix = false, uppercase = true, group = false) {
     const parsed = this.toDecimal(value, base);
     if (!parsed.success) return parsed;
-    return { success: true, results: Object.fromEntries([['binary', 2], ['octal', 8], ['decimal', 10], ['hexadecimal', 16]].map(([name, radix]) => [name, this.fromDecimal(parsed.result, radix, prefix, uppercase).result])) };
+    return { success: true, results: Object.fromEntries([['binary', 2], ['octal', 8], ['decimal', 10], ['hexadecimal', 16]].map(([name, radix]) => [name, this.fromDecimal(parsed.result, radix, prefix, uppercase, group).result])) };
   }
 };
