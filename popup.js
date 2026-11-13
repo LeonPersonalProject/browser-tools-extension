@@ -1,4 +1,4 @@
-import { appView, tools } from './utils/appView.js';
+import { appView, tools, themeSkin } from './utils/appView.js';
 import { initSelects } from './utils/controls.js';
 import { jsonFormatter } from './utils/jsonFormatter.js';
 import { timestamp } from './utils/timestamp.js';
@@ -36,10 +36,11 @@ function feedback(message, failure = false, announce = true) {
   moodTimer = setTimeout(() => nav.classList.remove('is-happy', 'is-confused'), 1100);
   if (!failure && announce && root.dataset.motion !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const rect = nav.getBoundingClientRect();
+    const glyphs = (themeSkin[root.dataset.theme] || themeSkin.__base).sparkle;
     for (let i = 0; i < 4; i++) {
       const star = document.createElement('span');
       star.className = 'sparkle';
-      star.textContent = ['✦', '✧', '⋆', '✷'][i];
+      star.textContent = glyphs[i];
       star.style.left = rect.left + 12 + i * 10 + 'px';
       star.style.top = rect.top + 5 + (i % 2) * 8 + 'px';
       star.style.animationDelay = i * 45 + 'ms';
@@ -85,19 +86,26 @@ function initShell() {
     $('theme-mode').dispatchEvent(new Event('change'));
   };
   let theme = pref.get('theme', 'light');
-  if (!['light', 'dark', 'system'].includes(theme)) theme = 'light';
+  if (!['light', 'dark', 'cyber', 'pixel', 'system'].includes(theme)) theme = 'light';
   // 设置同步与应用分开，避免 change 监听递归。
   root.dataset.theme = theme === 'system' ? (systemTheme.matches ? 'dark' : 'light') : theme;
   $('theme-mode').value = theme;
+  applyThemeCopy();
   $('theme-mode').addEventListener('change', () => {
     theme = $('theme-mode').value;
     pref.set('theme', theme);
     root.dataset.theme = theme === 'system' ? (systemTheme.matches ? 'dark' : 'light') : theme;
+    applyThemeCopy();
   });
   systemTheme.addEventListener('change', () => {
-    if (theme === 'system') root.dataset.theme = systemTheme.matches ? 'dark' : 'light';
+    if (theme === 'system') { root.dataset.theme = systemTheme.matches ? 'dark' : 'light'; applyThemeCopy(); }
   });
-  $('theme-quick').addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+  // 快速按钮循环切换全部主题风格（不再只是明暗二选一）。
+  const THEME_CYCLE = ['light', 'dark', 'cyber', 'pixel'];
+  $('theme-quick').addEventListener('click', () => {
+    const index = THEME_CYCLE.indexOf(root.dataset.theme);
+    applyTheme(THEME_CYCLE[(index + 1) % THEME_CYCLE.length]);
+  });
   let motion = pref.get('candy-motion', 'on') !== 'off';
   const applyMotion = () => {
     root.dataset.motion = motion ? 'on' : 'off';
@@ -184,6 +192,25 @@ function initShell() {
     if (button) copyText($(button.dataset.copy).textContent);
   });
 }
+// 按当前主题应用品牌名、问候语、装饰字形、纸标签与工具文案语气。
+function applyThemeCopy() {
+  const skin = themeSkin[root.dataset.theme] || themeSkin.__base;
+  const setHTML = (id, value) => { const el = $(id); if (el && value != null) el.innerHTML = value; };
+  setHTML('brand-name', skin.brand);
+  setHTML('brand-sub', skin.sub);
+  setHTML('brand-greet', skin.greet);
+  setHTML('side-foot', skin.foot);
+  setHTML('foot-deco', skin.footDeco);
+  setHTML('sticker-deco', skin.stickerDeco);
+  setHTML('ticket-deco', skin.ticketDeco);
+  setHTML('picker-label', skin.picker);
+  ['tab-json', 'tab-enc-in', 'tab-enc-out', 'tab-pass'].forEach((id, i) => setHTML(id, skin.tabs[i]));
+  const id = Object.hasOwn(tools, currentTool) ? currentTool : 'json';
+  const tool = tools[id];
+  $('page-title').textContent = tool[0];
+  $('page-description').textContent = skin.desc[id] || tool[2];
+  $('mood-text').textContent = skin.mood[id] || tool[3];
+}
 function showTool(id) {
   if (!Object.hasOwn(tools, id)) id = 'json';
   closeSelects?.();
@@ -196,8 +223,7 @@ function showTool(id) {
     if (item.dataset.tool === id) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current');
   });
   $('page-title').textContent = tools[id][0];
-  $('page-description').textContent = tools[id][2];
-  $('mood-text').textContent = tools[id][3];
+  applyThemeCopy();
   $(''+id+'-page').classList.remove('page-enter');
   void $(''+id+'-page').offsetWidth;
   $(''+id+'-page').classList.add('page-enter');
@@ -452,7 +478,7 @@ function initEncoder() {
     changed();
     const jwt = $('encode-type').value === 'jwt';
     $('jwt-notice').hidden = !jwt;
-    $('encode-btn').textContent = jwt ? '✧ 解析 JWT' : '✧ 编码';
+    $('encode-btn').innerHTML = jwt ? '<span class="deco">✧ </span>解析 JWT' : '<span class="deco">✧ </span>编码';
     $('decode-btn').hidden = jwt;
     $('encode-swap').hidden = jwt;
   });
@@ -577,7 +603,7 @@ function initPasswordGenerator() {
     $('password-count').textContent = '0 字符';
     $('password-copy').disabled = true;
     $('password-status').textContent = '等待生成';
-    $('password-generate').textContent = '✧ 生成密码';
+    $('password-generate').innerHTML = '<span class="deco">✧ </span>生成密码';
   };
   const validate = () => {
     const lengthValid = Number.isInteger(input.valueAsNumber) && input.valueAsNumber >= passwordGenerator.minLength && input.valueAsNumber <= passwordGenerator.maxLength;

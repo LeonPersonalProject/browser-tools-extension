@@ -331,3 +331,135 @@ h2 { font-size: 18px; letter-spacing: -.03em; }
   .color-card { max-width: 340px; width: 100%; }
   .code-output { height: 230px; }
 }
+
+/* ============================================================
+   赛博机能 · 夜网终端：暗底霓虹、等宽字体、切角硬边、
+   扫描线叠加，吉祥物重画为终端机器人（护目镜 + 天线）。
+   ============================================================ */
+:root[data-theme=cyber] {
+  color-scheme: dark;
+  --bg: #070b10; --paper: #0c141c; --text: #b6f0ff; --muted: #5c8797;
+  --line: #16333d; --code: #08131a; --pink: #ff2d95; --mint: #05ffa1;
+  --lemon: #fffb96; --blue: #01cdfe; --grape: #b967ff; --rose: #00ffd5;
+  --primary: #00ffd5; --primary-ink: #04121a; --shadow: #04141a; --soft: #102530;
+  --key: #01cdfe; --string: #05ffa1; --number: #fffb96; --error: #ff5c7a;
+  --radius: 4px;
+  font-family: 'Consolas', 'JetBrains Mono', 'SFMono-Regular', 'Courier New', monospace;
+}
+:root[data-theme=cyber] ::selection { background: var(--pink); color: #04121a; }
+:root[data-theme=cyber] body::after { content: ''; position: fixed; inset: 0; z-index: 700; pointer-events: none; background: repeating-linear-gradient(rgba(0, 255, 213, .035) 0 1px, transparent 1px 3px); }
+:root[data-theme=cyber] h1 { letter-spacing: .5px; }
+:root[data-theme=cyber] h1::after { content: '_'; color: var(--rose); animation: cyber-blink 1.1s steps(1) infinite; }
+@keyframes cyber-blink { 50% { opacity: 0; } }
+:root[data-theme=cyber] .error:not(:empty)::before { content: '⚠ '; }
+:root[data-theme=cyber] .paper { border-color: var(--line); box-shadow: none; }
+:root[data-theme=cyber] .result-paper { border-color: #1c5c50; }
+:root[data-theme=cyber] .result-paper > .paper-heading { background: rgba(5, 255, 161, .07); }
+:root[data-theme=cyber] .time-ticket { border-color: #1d4c66; box-shadow: none; }
+:root[data-theme=cyber] .ticket-heading > span { color: var(--blue); }
+:root[data-theme=cyber] .encoded-paper { border-color: #4a3568; box-shadow: none; }
+:root[data-theme=cyber] input, :root[data-theme=cyber] select, :root[data-theme=cyber] .select-trigger,
+:root[data-theme=cyber] button, :root[data-theme=cyber] .select-menu, :root[data-theme=cyber] .code-input,
+:root[data-theme=cyber] .code-output, :root[data-theme=cyber] .search-result, :root[data-theme=cyber] .toast,
+:root[data-theme=cyber] dialog, :root[data-theme=cyber] .number-strip { border-radius: 3px; }
+:root[data-theme=cyber] input:not([type=checkbox], [type=color], [type=range]), :root[data-theme=cyber] select, :root[data-theme=cyber] .select-trigger { background: var(--code); box-shadow: none; }
+:root[data-theme=cyber] input[type=checkbox] { border-radius: 2px; }
+:root[data-theme=cyber] input[type=checkbox]:checked { background: var(--primary); border-color: var(--primary); }
+:root[data-theme=cyber] input[type=range] { background: var(--soft); border-color: var(--line); }
+:root[data-theme=cyber] input[type=range]::-webkit-slider-thumb { border-radius: 2px; border: 1px solid var(--line); background: var(--pink); box-shadow: 0 0 8px rgba(255, 45, 149, .5); }
+:root[data-theme=cyber] .deco { display: none; }
+:root[data-theme=cyber] .primary-button { background: transparent; color: var(--primary); border: 1px solid var(--primary); border-radius: 3px; box-shadow: 0 0 12px rgba(0, 255, 213, .18); clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); letter-spacing: 1px; }
+:root[data-theme=cyber] .primary-button::before { content: '▸ '; }
+:root[data-theme=cyber] .primary-button:hover { box-shadow: 0 0 20px rgba(0, 255, 213, .4); }
+:root[data-theme=cyber] .primary-button:active { box-shadow: 0 0 6px rgba(0, 255, 213, .3); }
+:root[data-theme=cyber] .soft-button { background: var(--paper); border-color: var(--line); box-shadow: none; border-radius: 3px; }
+:root[data-theme=cyber] .mood-sticker { background: #0a1a22; color: var(--rose); border: 1px solid var(--rose); border-radius: 2px; box-shadow: 0 0 12px rgba(0, 255, 213, .2); transform: none; letter-spacing: 1px; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
+:root[data-theme=cyber] .paper-tab { background: transparent; color: var(--rose); border: 1px solid var(--rose); border-radius: 2px; transform: none; letter-spacing: 1px; box-shadow: 0 0 10px rgba(0, 255, 213, .15); }
+:root[data-theme=cyber] .mint-tab { color: var(--mint); border-color: var(--mint); }
+:root[data-theme=cyber] .grape-tab { color: var(--grape); border-color: var(--grape); }
+:root[data-theme=cyber] .nav-toggle { border-style: solid; border-color: var(--line); }
+:root[data-theme=cyber] .base-badge { color: #04121a; border-radius: 2px; }
+:root[data-theme=cyber] .number-strip { box-shadow: none; }
+:root[data-theme=cyber] .pal { --acc: var(--rose); background: #0a1a22; border: 1.5px solid var(--acc); border-radius: 3px; }
+:root[data-theme=cyber] .pal .eyes { left: 6px; top: 12px; width: calc(100% - 12px); height: 4px; border-radius: 1px; background: var(--acc); box-shadow: 0 0 7px var(--acc); }
+:root[data-theme=cyber] .pal .mouth { left: 8px; top: auto; bottom: 5px; width: calc(100% - 16px); height: 3px; border: 0; border-radius: 0; background: repeating-linear-gradient(90deg, var(--muted) 0 2px, transparent 2px 4px); }
+:root[data-theme=cyber] .pal .cheeks { display: none; }
+:root[data-theme=cyber] .pal .ear { display: block; width: 2px; height: 8px; top: -8px; border: 0; border-radius: 0; background: var(--pink); }
+:root[data-theme=cyber] .pal .ear-one { left: 9px; transform: none; }
+:root[data-theme=cyber] .pal .ear-two { right: 9px; transform: none; }
+:root[data-theme=cyber] .pal-symbol { color: var(--acc); opacity: .85; }
+:root[data-theme=cyber] .pal-brand::before, :root[data-theme=cyber] .pal-color::before, :root[data-theme=cyber] .pal-password::before { content: none; }
+:root[data-theme=cyber] .pal-brand { --acc: #01cdfe; }
+:root[data-theme=cyber] .pal-timestamp { --acc: #00ffd5; }
+:root[data-theme=cyber] .pal-encoder { --acc: #05ffa1; }
+:root[data-theme=cyber] .pal-color { --acc: #b967ff; }
+:root[data-theme=cyber] .pal-converter { --acc: #fffb96; }
+:root[data-theme=cyber] .pal-password { --acc: #ff2d95; }
+:root[data-theme=cyber] .is-happy .pal .eyes { height: 4px; top: 12px; }
+
+/* ============================================================
+   像素复古 · 8-BIT：暗底复古配色、等宽粗体、直角硬边框、
+   偏移硬阴影、CRT 扫描线，吉祥物重画为方块像素精灵。
+   ============================================================ */
+:root[data-theme=pixel] {
+  color-scheme: dark;
+  --bg: #1a1c2c; --paper: #252739; --text: #f4f4f4; --muted: #9096c0;
+  --line: #0d0e17; --code: #20223a; --pink: #ff7ab8; --mint: #41e08a;
+  --lemon: #ffd93d; --blue: #57e3ff; --grape: #b967ff; --rose: #ff9d5c;
+  --primary: #41e08a; --primary-ink: #0d0e17; --shadow: #0d0e17; --soft: #2f3250;
+  --key: #57e3ff; --string: #41e08a; --number: #ffd93d; --error: #ff5a5a;
+  --radius: 0px;
+  font-family: 'Consolas', 'Courier New', monospace; font-weight: 700;
+}
+:root[data-theme=pixel] ::selection { background: var(--lemon); color: var(--line); }
+:root[data-theme=pixel] body::after { content: ''; position: fixed; inset: 0; z-index: 700; pointer-events: none; background: repeating-linear-gradient(rgba(0, 0, 0, .14) 0 2px, transparent 2px 4px); }
+:root[data-theme=pixel] h1 { letter-spacing: 1px; text-shadow: 2px 2px 0 var(--line); }
+:root[data-theme=pixel] h1::after { content: '▶'; color: var(--lemon); }
+:root[data-theme=pixel] .error:not(:empty)::before { content: '✖ '; }
+:root[data-theme=pixel] .paper { border: 3px solid var(--line); border-radius: 0; background: var(--paper); box-shadow: 4px 4px 0 var(--shadow); }
+:root[data-theme=pixel] .result-paper { border-color: var(--line); }
+:root[data-theme=pixel] .result-paper > .paper-heading { background: rgba(65, 224, 138, .14); }
+:root[data-theme=pixel] .time-ticket { border-color: var(--line); box-shadow: 4px 4px 0 var(--shadow); }
+:root[data-theme=pixel] .ticket-heading > span { color: var(--blue); }
+:root[data-theme=pixel] .encoded-paper { box-shadow: 4px 4px 0 var(--shadow); }
+:root[data-theme=pixel] input, :root[data-theme=pixel] select, :root[data-theme=pixel] .select-trigger,
+:root[data-theme=pixel] button, :root[data-theme=pixel] .select-menu, :root[data-theme=pixel] .code-input,
+:root[data-theme=pixel] .code-output, :root[data-theme=pixel] .search-result, :root[data-theme=pixel] .toast,
+:root[data-theme=pixel] dialog, :root[data-theme=pixel] .number-strip { border-radius: 0; }
+:root[data-theme=pixel] input:not([type=checkbox], [type=color], [type=range]), :root[data-theme=pixel] select, :root[data-theme=pixel] .select-trigger { border: 2px solid var(--line); background: var(--code); box-shadow: 2px 2px 0 var(--shadow); }
+:root[data-theme=pixel] input[type=checkbox] { border: 2px solid var(--line); border-radius: 0; }
+:root[data-theme=pixel] input[type=checkbox]:checked { background: var(--primary); border-color: var(--line); }
+:root[data-theme=pixel] input[type=range] { border: 2px solid var(--line); background: var(--soft); border-radius: 0; }
+:root[data-theme=pixel] input[type=range]::-webkit-slider-thumb { border-radius: 0; border: 2px solid var(--line); background: var(--lemon); box-shadow: none; }
+:root[data-theme=pixel] .deco { display: none; }
+:root[data-theme=pixel] .primary-button { background: var(--primary); color: var(--primary-ink); border: 3px solid var(--line); border-radius: 0; box-shadow: 3px 3px 0 var(--line); letter-spacing: 1px; }
+:root[data-theme=pixel] .primary-button::before { content: '► '; }
+:root[data-theme=pixel] .primary-button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--line); }
+:root[data-theme=pixel] .soft-button { border: 3px solid var(--line); border-radius: 0; box-shadow: 3px 3px 0 var(--line); }
+:root[data-theme=pixel] .soft-button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--line); }
+:root[data-theme=pixel] .mood-sticker { background: var(--lemon); color: var(--line); border: 3px solid var(--line); border-radius: 0; box-shadow: 3px 3px 0 var(--line); transform: none; letter-spacing: 1px; }
+:root[data-theme=pixel] .paper-tab { background: var(--blue); color: var(--line); border: 3px solid var(--line); border-radius: 0; transform: none; box-shadow: 2px 2px 0 var(--line); letter-spacing: 1px; }
+:root[data-theme=pixel] .mint-tab { background: var(--mint); }
+:root[data-theme=pixel] .grape-tab { background: var(--grape); }
+:root[data-theme=pixel] .nav-toggle { border-style: solid; border-width: 2px; border-color: var(--line); }
+:root[data-theme=pixel] .base-badge { color: var(--line); border-radius: 0; }
+:root[data-theme=pixel] .number-strip { border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--shadow); }
+:root[data-theme=pixel] .pal { --acc: var(--pink); background: var(--acc); border: 3px solid var(--line); border-radius: 0; box-shadow: 2px 2px 0 var(--line); }
+:root[data-theme=pixel] .pal .eyes { left: 6px; top: 9px; width: 5px; height: 5px; border-radius: 0; background: var(--line); box-shadow: 11px 0 0 var(--line); }
+:root[data-theme=pixel] .pal .mouth { left: 9px; top: auto; bottom: 6px; width: 12px; height: 4px; border: 0; border-radius: 0; background: var(--line); }
+:root[data-theme=pixel] .pal .cheeks { display: none; }
+:root[data-theme=pixel] .pal .ear { display: block; width: 6px; height: 6px; top: -7px; border: 3px solid var(--line); border-radius: 0; background: var(--acc); }
+:root[data-theme=pixel] .pal .ear-one { left: 4px; transform: none; }
+:root[data-theme=pixel] .pal .ear-two { right: 4px; transform: none; }
+:root[data-theme=pixel] .pal-symbol { color: var(--line); opacity: .7; }
+:root[data-theme=pixel] .pal-brand::before, :root[data-theme=pixel] .pal-color::before, :root[data-theme=pixel] .pal-password::before { content: none; }
+:root[data-theme=pixel] .pal-brand { --acc: #41e08a; }
+:root[data-theme=pixel] .pal-timestamp { --acc: #57e3ff; }
+:root[data-theme=pixel] .pal-encoder { --acc: #41e08a; }
+:root[data-theme=pixel] .pal-color { --acc: #b967ff; }
+:root[data-theme=pixel] .pal-converter { --acc: #ffd93d; }
+:root[data-theme=pixel] .pal-password { --acc: #ff7ab8; }
+:root[data-theme=pixel] .is-happy .pal .eyes { height: 5px; top: 9px; }
+/* 提示条随风格重绘：去掉可爱风的黄色虚线便签感。 */
+:root[data-theme=cyber] .notice { background: rgba(255, 251, 150, .06); border: 1px solid #6b6330; border-radius: 3px; color: var(--lemon); }
+:root[data-theme=pixel] .notice { background: rgba(255, 217, 61, .08); border: 2px solid var(--line); border-radius: 0; box-shadow: 2px 2px 0 var(--shadow); color: var(--lemon); }
