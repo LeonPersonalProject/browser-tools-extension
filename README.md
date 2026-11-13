@@ -57,7 +57,7 @@
 - utils/jsonCore.js / jsonFormatter.js：共享 JSON 逻辑及模块入口。
 - utils/timestamp.js、encoder.js、colorPicker.js、converter.js、passwordGenerator.js：工具逻辑。
 - json-modal-inject.js / .css：Shadow DOM 隔离的网页大窗口。
-- assets/icon-128.png：扩展图标。
+- assets/icon.svg、icon-16.png、icon-48.png、icon-128.png：六色拼片扩展图标及源文件。
 
 详细使用、边界说明及验证步骤见 [DOCS.md](DOCS.md)，变更见 [CHANGELOG.md](CHANGELOG.md)。
 
